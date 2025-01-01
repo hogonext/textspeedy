@@ -22,4 +22,4 @@ Quick Start
 - Install SqlLite :  [Download SqlLite]([https://www.python.org/downloads/](https://www.sqlite.org/download.html))
 - Download Source Code: [Github](https://github.com/hogonext/textspeedy)
 - Windows: double-click **run.bat** file
-- Linux and MacOS: In terminal, **ython app.py** in the folder of source code.
+- Linux and MacOS: In terminal, **python app.py** in the folder of source code.
