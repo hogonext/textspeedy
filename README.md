@@ -15,5 +15,4 @@ Features
 - Text Utility: Improve your writing and editing process with advanced text manipulation tools that offer functions like search-and-replace, formatting, etc.
 - and much more
 
-
 ![TextSpeedy](https://hogonext.com/wp-content/uploads/2025/01/TextSpeedy.jpg)
