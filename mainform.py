@@ -528,14 +528,6 @@ def create_app():
     help_menu = Menu(menubar, tearoff=0)
     help_menu.add_command(
         label="Website", command=lambda: webbrowser.open("https://hogognext.com/textspeedy/"))
-    help_menu.add_command(label="Blog", command=lambda: webbrowser.open(
-        "https://hogognext.com/textspeedy/category/blog/"))
-    help_menu.add_command(label="Keyboard Shortcuts", command=lambda: webbrowser.open(
-        "https://hogognext.com/textspeedy/keyboard-shortcuts/"))
-    help_menu.add_command(label="Snippet Library", command=lambda: webbrowser.open(
-        "https://hogognext.com/textspeedy/snippet-library/"))
-    help_menu.add_command(label="License - Credits",
-                          command=lambda: webbrowser.open("https://hogognext.com/textspeedy/license-credits/"))
 
     menubar.add_cascade(label="File", menu=file_menu)
     menubar.add_cascade(label="Plugin", menu=plugin_menu)
