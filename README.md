@@ -16,3 +16,10 @@ Features
 - and much more
 
 ![TextSpeedy](https://hogonext.com/wp-content/uploads/2025/01/TextSpeedy.jpg)
+
+Quick Start
+- Install Python version 3.12 and above : [Download Python](https://www.python.org/downloads/)
+- Install SqlLite :  [Download SqlLite]([https://www.python.org/downloads/](https://www.sqlite.org/download.html))
+- Download Source Code: [Github](https://github.com/hogonext/textspeedy)
+- Windows: double-click **run.bat** file
+- Linux and MacOS: In terminal, **ython app.py** in the folder of source code.
