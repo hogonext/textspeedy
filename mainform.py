@@ -527,7 +527,7 @@ def create_app():
 
     help_menu = Menu(menubar, tearoff=0)
     help_menu.add_command(
-        label="Website", command=lambda: webbrowser.open("https://hogognext.com/textspeedy/"))
+        label="Website", command=lambda: webbrowser.open("https://hogonext.com/textspeedy/"))
 
     menubar.add_cascade(label="File", menu=file_menu)
     menubar.add_cascade(label="Plugin", menu=plugin_menu)
