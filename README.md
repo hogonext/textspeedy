@@ -4,13 +4,9 @@ TextSpeedy puts you in control. It’s completely free to download, and you have
 
 TextSpeedy is open source software written in Python.
 
-Author: Ho Dang
-
-Linkedin: https://www.linkedin.com/in/dangngocho/
-
 Email: hogonext@gmail.com
 
-Website: https://textspeedy.com
+Website: https://hogonext.com/textspeedy
 
 Features
 - Text Expansion: Enhance your typing efficiency with this feature that allows you to insert predefined snippets of text into any application, saving you time and effort.
