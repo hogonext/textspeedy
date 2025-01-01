@@ -687,7 +687,7 @@ def create_app():
 
         menu = item('Open',
                     show_window), (item('Exit', quit_window))
-        icon = pystray.Icon("name", image, "textspeedy", menu)
+        icon = pystray.Icon("name", image, "TextSpeedy", menu)
         icon.run()
 
     root.protocol('WM_DELETE_WINDOW', hide_window)
