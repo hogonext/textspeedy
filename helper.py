@@ -1,5 +1,7 @@
 import sys
 import io
+import os
+import tempfile
 import re
 from collections import OrderedDict
 
@@ -24,10 +26,11 @@ from database import Database
 
 db = Database()
 
+
 def get_theme():
     theme = db.get_settings_by_key('Theme')[0]
-    if theme=='dark': return "darkly"
-    else: #light
+    if theme == 'dark': return "darkly"
+    else:  # light
         return "yeti"
 
 
@@ -41,15 +44,25 @@ def count_words(content):
     word_count = len(words)
     return word_count
 
+
 def execute(code):
     try:
         # Create a stream to capture stdout
         original_stdout = sys.stdout
         sys.stdout = captured_output = io.StringIO()
-        #sys.stdout = captured_output = []
+        # sys.stdout = captured_output = []
 
         # Execute the provided code
-        exec(code)
+        #exec(code)
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".py") as tmp:
+            tmp.write(code)
+            tmp_name = tmp.name
+
+        try:
+            os.system(f"python {tmp_name}")
+        finally:
+            os.remove(tmp_name)
 
         # Restore the original stdout
         sys.stdout = original_stdout
@@ -107,8 +120,8 @@ def highlight_bold(text_widget):
 
 def highlight_italic(text_widget):
     # Define a tag for orange italic text
-    yellow_italic_font = Font(text_widget, text_widget.cget("font"), slant="italic")
-    text_widget.tag_configure("yellow_italic", foreground="yellow", font=yellow_italic_font)
+    blue_italic_font = Font(text_widget, text_widget.cget("font"), slant="italic")
+    text_widget.tag_configure("blue_italic", foreground="blue", font=blue_italic_font)
 
     # Search for the pattern and apply the tag
     start = "1.0"
@@ -122,7 +135,7 @@ def highlight_italic(text_widget):
         if not end_index:
             break
         # Apply the tag to the text between the underscores
-        text_widget.tag_add("yellow_italic", start_index, end_index + "+1c")
+        text_widget.tag_add("blue_italic", start_index, end_index + "+1c")
         # Update the start position
         start = end_index + "+2c"
 
