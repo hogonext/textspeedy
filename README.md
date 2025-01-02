@@ -8,7 +8,7 @@ Email: hogonext@gmail.com
 
 Website: https://hogonext.com/textspeedy
 
-Features
+## Features
 - Text Expansion: Enhance your typing efficiency with this feature that allows you to insert predefined snippets of text into any application, saving you time and effort.
 - Command Execution: Streamline your workflow by executing predefined commands in multiple applications, enabling quick actions and automation.
 - Note-Taking: Capture and organize your ideas with a note-taking tool that supports Markdown formatting, making it easy to structure and stylize your notes.
@@ -17,9 +17,14 @@ Features
 
 ![TextSpeedy](https://hogonext.com/wp-content/uploads/2025/01/TextSpeedy.jpg)
 
-Quick Start
+## Quick Start
 - Install Python version 3.12 and above : [Download Python](https://www.python.org/downloads/)
 - Install SqlLite :  [Download SqlLite]([https://www.python.org/downloads/](https://www.sqlite.org/download.html))
 - Download Source Code: [Github](https://github.com/hogonext/textspeedy)
 - Windows: double-click **run.bat** file
 - Linux and MacOS: In terminal, **python app.py** in the folder of source code.
+
+## Using
+In any applicaton, type below 
+- **/shortcut** and press **space key** to do Text Replacement 
+- **/.shortcut** and press **space key** to run a command
