@@ -3,6 +3,7 @@ import tkinter as tk
 import webbrowser
 from pystray import MenuItem as item
 import pystray
+import pyperclip
 from PIL import Image, ImageTk
 
 from tkinter import Menu, messagebox, simpledialog, END, VERTICAL
