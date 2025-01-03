@@ -554,6 +554,17 @@ def create_app():
     status_frame = tk.Frame(right_frame)
     status_frame.pack(side="bottom", fill="x")
 
+    # Textbox above the Combobox
+    textbox = tk.Entry(left_frame)
+    textbox.pack(side="top", fill="x") 
+
+    # Load the search icon image (replace 'search_icon.png' with your image path)
+    search_icon = tk.PhotoImage(file='search.png') 
+
+    # Create a label to display the icon
+    icon_label = tk.Label(textbox, image=search_icon)
+    icon_label.pack(side="right")  # Place the icon on the right side
+
     # Combobox above the Treeview
     combobox = ttk.Combobox(left_frame)
     combobox.state(["readonly"])
