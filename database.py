@@ -164,14 +164,14 @@ class Database:
         cursor.execute(query)
         return cursor.fetchone()[0]
 
-    def search_note_item(self, text):
+    def search_note_item_by_title_for_treeview(self, text):
         query = """
-            SELECT * FROM notes
-            WHERE title LIKE '%' || ? || '%'
-            OR shortcut LIKE '%' || ? || '%'
+            SELECT id, title, shortcut FROM notes
+            WHERE title LIKE ?
+            ORDER BY datetime(updatedDateTime) DESC
         """
         cursor = self.connection.cursor()
-        cursor.execute(query, (text, text))
+        cursor.execute(query, ('%' + text + '%',))  # Correct parameter passing
         return cursor.fetchall()
 
     def search_note_item_by_shortcut(self, shortcut):

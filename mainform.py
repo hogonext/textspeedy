@@ -56,6 +56,15 @@ def load_nodes(treeview):
     for item in data:
         treeview.insert("", "end", values=(
             item[0], item[1], item[2]))  # id, title, shortcut
+        
+def load_nodes_by_search(treeview):
+    global selected_node_category
+    clear_treeview(treeview)
+    print(searchbox.get())
+    data = helper.db.search_note_item_by_title_for_treeview(searchbox.get())
+    for item in data:
+        treeview.insert("", "end", values=(
+            item[0], item[1], item[2]))  # id, title, shortcut
 
 def treeview_has_items(treeview):
     for item in treeview.get_children():
@@ -122,6 +131,14 @@ def on_text_change(event):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def on_search_change(event):
+    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title, selected_note_content
+
+    try:
+        load_nodes_by_search(treeview)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def create_new_note(event):
 
@@ -477,10 +494,6 @@ def publish_WP(event):
     messagebox.showinfo('Publish Wordpress',
                         'This note is published successfully')
 
-def display_rss_reader(event):
-    import rss_reader
-    rss_reader.display()
-
 def display_text_utility(event):
     import text_utility
     text_utility.display()
@@ -497,7 +510,7 @@ def display_url_extractor(event):
 
 
 def create_app():
-    global root, treeview, editor, status_label, combobox
+    global root, treeview, editor, status_label, combobox, searchbox
     # root = tk.Tk()
     # root = ttk.Window(themename="darkly")
     root = ttk.Window(themename=helper.get_theme())
@@ -555,14 +568,16 @@ def create_app():
     status_frame.pack(side="bottom", fill="x")
 
     # Textbox above the Combobox
-    textbox = tk.Entry(left_frame)
-    textbox.pack(side="top", fill="x") 
+    searchbox = tk.Entry(left_frame)
+    searchbox.pack(side="top", fill="x")
+    # Bind the key release event to the entry widget
+    searchbox.bind("<KeyRelease>", on_search_change)
 
     # Load the search icon image (replace 'search_icon.png' with your image path)
     search_icon = tk.PhotoImage(file='search.png') 
 
     # Create a label to display the icon
-    icon_label = tk.Label(textbox, image=search_icon)
+    icon_label = tk.Label(searchbox, image=search_icon)
     icon_label.pack(side="right")  # Place the icon on the right side
 
     # Combobox above the Treeview
