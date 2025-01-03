@@ -56,24 +56,27 @@ def load_nodes(treeview):
     for item in data:
         treeview.insert("", "end", values=(
             item[0], item[1], item[2]))  # id, title, shortcut
-        
+
+
 def load_nodes_by_search(treeview):
     global selected_node_category
     clear_treeview(treeview)
-    print(searchbox.get())
     data = helper.db.search_note_item_by_title_for_treeview(searchbox.get())
     for item in data:
         treeview.insert("", "end", values=(
             item[0], item[1], item[2]))  # id, title, shortcut
+
 
 def treeview_has_items(treeview):
     for item in treeview.get_children():
         return True
     return False
 
+
 def select_first_item(treeview):
     # Assuming 'tree' is your Treeview widget
-    if treeview_has_items(treeview) == False: return
+    if treeview_has_items(treeview) == False:
+        return
     # Get the ID of the first item
     first_item = treeview.get_children()[0]
     # Set the focus to the first item
@@ -131,6 +134,7 @@ def on_text_change(event):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 def on_search_change(event):
     global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title, selected_note_content
 
@@ -139,6 +143,7 @@ def on_search_change(event):
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 def create_new_note(event):
 
@@ -160,7 +165,7 @@ def create_new_note(event):
 def change_note_title(event):
     global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
 
-    #center_dialog(dialog)
+    # center_dialog(dialog)
 
     selected_node_title = simpledialog.askstring(
         title="Change title", prompt="Enter new title:\t\t\t\t\t", initialvalue=selected_node_title
@@ -175,6 +180,7 @@ def change_note_title(event):
         load_nodes(treeview)
 
         select_first_item(treeview)
+
 
 def change_note_shortcut(event):
     global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
@@ -192,6 +198,7 @@ def change_note_shortcut(event):
         load_nodes(treeview)
 
         select_first_item(treeview)
+
 
 def delete_note(event):
     global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
@@ -441,7 +448,7 @@ def update_status_label(event_type):
 
     info = "Title: " + selected_node_title + " | " + "Category: " + \
         selected_node_category + " | " + "Shortcut: " + selected_node_shortcut
-    
+
     info = info + " | " + "Words: " + word_count + \
         " | " + " | " + "Lines: " + total_lines
 
@@ -464,6 +471,7 @@ def run_code(event):
     content = editor.get("1.0", "end-1c")
     output = helper.execute(content)
     print(output)
+
 
 def run_code_live_output(event):
     content = editor.get("1.0", "end-1c")
@@ -493,6 +501,7 @@ def publish_WP(event):
 
     messagebox.showinfo('Publish Wordpress',
                         'This note is published successfully')
+
 
 def display_text_utility(event):
     import text_utility
@@ -574,7 +583,7 @@ def create_app():
     searchbox.bind("<KeyRelease>", on_search_change)
 
     # Load the search icon image (replace 'search_icon.png' with your image path)
-    search_icon = tk.PhotoImage(file='search.png') 
+    search_icon = tk.PhotoImage(file='search.png')
 
     # Create a label to display the icon
     icon_label = tk.Label(searchbox, image=search_icon)
@@ -646,7 +655,6 @@ def create_app():
     root.bind('<F9>', run_code_live_output)
     root.bind('<F10>', publish_WP)
 
-
     # Bind the event handler to the selection event
     combobox.bind('<<ComboboxSelected>>', combobox_selected_value)
 
@@ -710,7 +718,6 @@ def create_app():
     image = Image.open("textspeedy.ico")
 
     def hide_window():
-
 
         root.withdraw()
 
