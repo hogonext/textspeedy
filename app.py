@@ -4,7 +4,6 @@ import pyperclip
 import time
 import subprocess
 
-
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 
@@ -64,9 +63,9 @@ def on_press(key):
         elif key == keyboard.Key.enter:
             keys.clear()
 
-    if key == keyboard.Key.alt_l:
+    if key == keyboard.Key.ctrl_l:
         quick_type = True
-        print('altr')
+        print('ctrl')
     elif quick_type and key == keyboard.Key.f1:
         print('open')
         try:
@@ -122,9 +121,6 @@ def setup(icon):
 
 # Set up the listener in a non-blocking fashion
 listener = keyboard.Listener(on_press=on_press)
-# Collect events until released 
-#with keyboard.Listener(on_press=on_press, on_release=on_release) as listener: 
-#    listener.join()
 listener.start()
 
 start_app()
