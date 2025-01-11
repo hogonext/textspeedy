@@ -2,6 +2,8 @@ import helper
 import mainform
 import pyperclip
 import time
+import subprocess
+
 
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
@@ -10,8 +12,10 @@ keys = []
 
 kb = Controller()
 
+quick_type = False
 
 def on_press(key):
+    global quick_type 
 
     if hasattr(key, 'char'):
         try:
@@ -60,6 +64,16 @@ def on_press(key):
         elif key == keyboard.Key.enter:
             keys.clear()
 
+    if key == keyboard.Key.alt_l:
+        quick_type = True
+        print('altr')
+    elif quick_type and key == keyboard.Key.f1:
+        print('open')
+        try:
+            subprocess.run(["python", "quick_type_box.py"])
+        except subprocess.CalledProcessError as e:
+            print(f"Error executing quick_type_box.py: {e}")
+        quick_type = False 
 
 def copy_paste(content):
     pyperclip.copy(content)
@@ -108,6 +122,9 @@ def setup(icon):
 
 # Set up the listener in a non-blocking fashion
 listener = keyboard.Listener(on_press=on_press)
+# Collect events until released 
+#with keyboard.Listener(on_press=on_press, on_release=on_release) as listener: 
+#    listener.join()
 listener.start()
 
 start_app()
