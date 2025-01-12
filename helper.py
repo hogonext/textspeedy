@@ -6,6 +6,7 @@ import re
 from collections import OrderedDict
 
 import requests
+from bs4 import BeautifulSoup
 
 import base64
 import xml.etree.ElementTree as ET
@@ -202,6 +203,15 @@ def publish_WP(url,username, password,title, status, category, content):
     response = requests.post(url, headers=header, json=post)
 
     print(response)
+
+def get_website_content(url):
+  try:
+    response = requests.get(url)
+    response.raise_for_status()  # Raise an exception for bad status codes
+    return response.text
+  except requests.exceptions.RequestException as e:
+    print(f"Error fetching {url}: {e}")
+    return None
 
 def capitalize_each_word(text):
     return '\n'.join(' '.join(word.capitalize() for word in line.split()) for line in text.splitlines())

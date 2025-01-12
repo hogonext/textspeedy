@@ -3,7 +3,7 @@ import tkinter as tk
 import webbrowser
 from pystray import MenuItem as item
 import pystray
-import pyperclip
+import subprocess
 from PIL import Image, ImageTk
 
 from tkinter import Menu, messagebox, simpledialog, END, VERTICAL
@@ -18,6 +18,7 @@ import helper
 import webview
 import markdown
 
+current_version = "1.1"
 
 selected_node_id = ''
 selected_node_category = 'All Categories'  # default
@@ -501,27 +502,28 @@ def publish_WP(event):
 
     messagebox.showinfo('Publish Wordpress',
                         'This note is published successfully')
-
+def display_about(event):
+    content = 'Version:' + current_version + "\n" + "Website: https://hogonext.com/textspeedy"
+    messagebox.showinfo('TextSpeedy', content)
 
 def display_text_utility(event):
     import text_utility
     text_utility.display()
 
-
 def display_settings_dialog(event):
     settings_dialog.display()
-
-
-def display_url_extractor(event):
-
-    import subprocess
-    subprocess.Popen(['python', 'url_extractor.py', '-t'])
-
 
 def create_app():
     global root, treeview, editor, status_label, combobox, searchbox
     # root = tk.Tk()
     # root = ttk.Window(themename="darkly")
+
+    new_version = helper.get_website_content("https://hogonext.com/textspeedy-vesion.html")
+
+    if (new_version != current_version):
+        subprocess.run(["python", "check_for_updates.py"])
+
+
     root = ttk.Window(themename=helper.get_theme())
 
     root.title("TextSpeedy")
@@ -553,6 +555,8 @@ def create_app():
         label="Website", command=lambda: webbrowser.open("https://hogonext.com/textspeedy/"))
     help_menu.add_command(
         label="Python Snippets", command=lambda: webbrowser.open("https://hogonext.com/blog/python-code/"))
+    help_menu.add_command(
+        label="About", command=lambda event=None: display_about(event))
 
     menubar.add_cascade(label="File", menu=file_menu)
     menubar.add_cascade(label="Plugin", menu=plugin_menu)
