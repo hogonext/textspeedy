@@ -120,22 +120,29 @@ title_bar.pack(fill=X)
 root.overrideredirect(True)
 
 # Create an input box
-entry = ttk.Entry(root)
-entry.pack(padx=10, pady=10, fill="x")
+searchbox = ttk.Entry(root)
+searchbox.pack(padx=10, pady=10, fill="x")
+# Initially set a larger font size
+searchbox.configure(font=('TkDefaultFont', 14))
+# Load the search icon image (replace 'search_icon.png' with your image path)
+search_icon = ttk.PhotoImage(file='search24px.png')
+
+# Create a label to display the icon
+icon_label = ttk.Label(searchbox, image=search_icon)
+icon_label.pack(side="right")  # Place the icon on the right side
 
 # Set focus on the entry widget
-entry.focus_set()
+searchbox.focus_set()
 
 # Bind the focus out event to the entry widget
-entry.bind("<FocusOut>", on_focus_out)
+searchbox.bind("<FocusOut>", on_focus_out)
 
-root.geometry("300x50")
+root.geometry("400x50")
 root.update_idletasks()
 
 # Calculate the offset to center the window
 x = (root.winfo_screenwidth() - root.winfo_width()) // 2
-y = (root.winfo_screenheight() - root.winfo_height()) // 2
+y = (root.winfo_screenheight() - root.winfo_height()) // 3
 root.geometry(f"+{x}+{y}")
-
 
 root.mainloop()
