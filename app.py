@@ -49,7 +49,6 @@ def on_press(key):
                     if is_runcommand == True:  # run command
                         old_shortcut = '.' + shortcut
                         delText(old_shortcut)
-                        time.sleep(1)
                         output = helper.execute(content)
                         print(output)
                         copy_paste(output)
@@ -65,9 +64,7 @@ def on_press(key):
 
     if key == keyboard.Key.ctrl_l:
         quick_type = True
-        print('ctrl')
     elif quick_type and key == keyboard.Key.f1:
-        print('open')
         try:
             subprocess.run(["python", "quick_type_box.py"])
         except subprocess.CalledProcessError as e:

@@ -61,7 +61,6 @@ def on_press(key):
                     if is_runcommand == True:  # run command
                         old_shortcut = '.' + shortcut
                         delText(old_shortcut)
-                        time.sleep(1)
                         output = helper.execute(content)
                         print(output)
                         copy_paste(output)
@@ -122,7 +121,7 @@ root.overrideredirect(True)
 
 # Create an input box
 entry = ttk.Entry(root)
-entry.pack(padx=10, pady=10)
+entry.pack(padx=10, pady=10, fill="x")
 
 # Set focus on the entry widget
 entry.focus_set()
@@ -137,19 +136,6 @@ root.update_idletasks()
 x = (root.winfo_screenwidth() - root.winfo_width()) // 2
 y = (root.winfo_screenheight() - root.winfo_height()) // 2
 root.geometry(f"+{x}+{y}")
-
-# Adjust the width of the entry widget to be 80% of the form's width
-def adjust_entry_width(event=None):
-    form_width = root.winfo_width()
-    entry_width = int(form_width * 0.8)
-    entry.config(width=entry_width)
-
-# Bind the configure event to adjust the entry width when the form is resized
-root.bind("<Configure>", adjust_entry_width)
-
-# Initial adjustment of the entry width
-adjust_entry_width()
-
 
 
 root.mainloop()
