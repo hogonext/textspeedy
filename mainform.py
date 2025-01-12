@@ -583,7 +583,7 @@ def create_app():
     searchbox.bind("<KeyRelease>", on_search_change)
 
     # Load the search icon image (replace 'search_icon.png' with your image path)
-    search_icon = tk.PhotoImage(file='search.png')
+    search_icon = tk.PhotoImage(file='image/search16px.png')
 
     # Create a label to display the icon
     icon_label = tk.Label(searchbox, image=search_icon)

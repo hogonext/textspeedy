@@ -19,7 +19,7 @@ def on_esc_key(event):
         root.destroy()
 
 def on_focus_out(event):
-    if event.widget == entry:
+    if event.widget == searchbox:
         root.destroy()
 
 def show_window():
@@ -125,7 +125,7 @@ searchbox.pack(padx=10, pady=10, fill="x")
 # Initially set a larger font size
 searchbox.configure(font=('TkDefaultFont', 14))
 # Load the search icon image (replace 'search_icon.png' with your image path)
-search_icon = ttk.PhotoImage(file='search24px.png')
+search_icon = ttk.PhotoImage(file='image/search24px.png')
 
 # Create a label to display the icon
 icon_label = ttk.Label(searchbox, image=search_icon)
