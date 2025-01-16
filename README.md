@@ -15,6 +15,8 @@ Website: https://hogonext.com/textspeedy
 - Text Utility: Improve your writing and editing process with advanced text manipulation tools that offer functions like search-and-replace, formatting, etc.
 - and much more
 
+## Click image to view Youtube Demo
+
 [![TextSpeedy](https://hogonext.com/wp-content/uploads/2025/01/TextSpeedy.jpg)](https://youtu.be/fl6XpFKuBXg)
 
 ## Quick Start
