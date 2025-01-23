@@ -103,6 +103,58 @@ def delText(s):
         kb.press(Key.backspace)
         kb.release(Key.backspace)
 
+def show_popup(event=None):
+    global popup
+
+    if popup:
+        popup.destroy()
+
+    word = searchbox.get()
+    print(word)    
+    if word:
+        data = helper.db.search_note_item_by_title_for_treeview(searchbox.get())
+
+
+        car_brands = ["Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Mercedes-Benz",
+                    "Audi", "Nissan", "Hyundai", "Kia", "Volkswagen", "Volvo", "Mazda"]
+        converted_array = [f"{item[2]} {item[1]}" for item in data]
+        print(converted_array)
+
+        suggestions = [brand for brand in converted_array if word.lower() in brand.lower()]
+        #suggestions = [brand for brand in car_brands if word.lower() in brand.lower()]
+        print(suggestions)
+
+    if not suggestions:
+        return
+
+    popup = ttk.Toplevel(root)
+    popup.overrideredirect(True)
+    popup.geometry(f"+{x}+{y+50}")
+    popup.geometry("400x200")
+
+    # Tạo Treeview
+    treeview = ttk.Treeview(popup, columns=("Shortcut", "Title"), show="headings")
+    treeview.heading("Shortcut", text="Shortcut", anchor='w')
+    treeview.heading("Title", text="Title", anchor='w')
+
+    treeview.column("Shortcut", width=60, anchor='w')
+    treeview.column("Title", width=250, anchor='w')
+
+    treeview.pack(expand=True, fill=ttk.BOTH)
+
+    # Chèn dữ liệu vào Treeview
+    for suggestion in suggestions:
+        parts = suggestion.split(' ', 1)  # Tách chuỗi thành hai phần
+        treeview.insert("", "end", values=(parts[0], parts[1]))
+
+    treeview.pack(padx=5, pady=5)
+
+    popup.after(5000, popup.destroy)
+
+popup = None  # Initialize popup variable
+
+
+
 # Set up the listener in a non-blocking fashion
 listener = keyboard.Listener(on_press=on_press)
 listener.start()
@@ -123,7 +175,7 @@ root.overrideredirect(True)
 searchbox = ttk.Entry(root)
 searchbox.pack(padx=10, pady=10, fill="x")
 # Initially set a larger font size
-searchbox.configure(font=('TkDefaultFont', 14))
+searchbox.configure(font=('TkDefaultFont', 12))
 # Load the search icon image (replace 'search_icon.png' with your image path)
 search_icon = ttk.PhotoImage(file='image/search24px.png')
 
@@ -136,6 +188,7 @@ searchbox.focus_set()
 
 # Bind the focus out event to the entry widget
 searchbox.bind("<FocusOut>", on_focus_out)
+searchbox.bind("<KeyRelease>", show_popup)
 
 root.geometry("400x50")
 root.update_idletasks()
