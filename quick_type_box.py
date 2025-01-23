@@ -114,8 +114,7 @@ def show_popup(event=None):
         data = helper.db.search_note_item_by_title_for_treeview(word)
 
         converted_array = [f"{item[2]} {item[1]}" for item in data]
-        print(converted_array)
-
+        
         suggestions = [brand for brand in converted_array if word.lower() in brand.lower()]
 
     if not suggestions:
@@ -159,7 +158,6 @@ listener.start()
 # Create the main window
 root = ttk.Window(themename="darkly")
 root.bind("<KeyPress>", on_esc_key)  # Bind to any key press
-
 
 # Create a frame for the title bar (though we won't use it for a button)
 title_bar = ttk.Frame(root)
