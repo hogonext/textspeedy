@@ -134,7 +134,13 @@ def show_popup(event=None):
     treeview.column("Shortcut", width=60, anchor='w')
     treeview.column("Title", width=250, anchor='w')
 
-    treeview.pack(expand=True, fill=ttk.BOTH)
+    # Tạo Scrollbar
+    scrollbar = ttk.Scrollbar(popup, orient="vertical", command=treeview.yview)
+    treeview.configure(yscrollcommand=scrollbar.set)
+
+    # Đặt Treeview và Scrollbar vào Frame
+    treeview.pack(side=ttk.LEFT, expand=True, fill=ttk.BOTH)
+    scrollbar.pack(side=ttk.RIGHT, fill=ttk.Y)
 
     # Chèn dữ liệu vào Treeview
     for suggestion in suggestions:
