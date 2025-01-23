@@ -15,7 +15,9 @@ Website: https://hogonext.com/textspeedy
 - Text Utility: Improve your writing and editing process with advanced text manipulation tools that offer functions like search-and-replace, formatting, etc.
 - and much more
 
-![TextSpeedy](https://hogonext.com/wp-content/uploads/2025/01/TextSpeedy.jpg)
+## Click image to view Youtube Demo
+
+[![TextSpeedy](https://hogonext.com/wp-content/uploads/2025/01/TextSpeedy.jpg)](https://youtu.be/fl6XpFKuBXg)
 
 ## Quick Start
 - Install Python version 3.12 and above : [Download Python](https://www.python.org/downloads/)
