@@ -81,6 +81,16 @@ def get_local_date_time():
     return current_datetime.strftime('%Y-%m-%d %H:%M:%S')
 
 
+def listToString(s):
+    # Initialize an empty string
+    str1 = ""
+    # Ensure s is a list or tuple of strings
+    if isinstance(s, (list, tuple)):
+        # Return string
+        return str1.join(s)
+    else:
+        raise ValueError("The argument must be an iterable of strings")
+
 def highlight_lines_with_hashes(text_widget):
     # Configure a tag for lines starting with '# ' followed by a space
     text_widget.tag_configure("hash_line", foreground="green")

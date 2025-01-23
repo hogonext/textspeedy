@@ -25,83 +25,20 @@ def on_focus_out(event):
 def show_window():
     root.deiconify()
 
-def on_press(key):
+def run_command(event):
     global quick_type 
 
-    if hasattr(key, 'char'):
-        try:
-            # Alphanumeric key (handling the case of '/' is inside the try-except block)
-            if key.char == '/':
-                keys.clear()
-            elif key.char.isalnum() or key.char == '.':
-                keys.append(key.char)
+    shortcut = searchbox.get()
 
-        except AttributeError:
-            # Handle the case where `key` doesn't have a `char` attribute
-            print("Error: Key does not have a 'char' attribute.")
+    print(shortcut)
+    data = helper.db.search_by_shortcut(shortcut)
 
-        except Exception as e:  # Catch any other unexpected exceptions
-            print(f"An unexpected error occurred: {e}")
-    else:
-        # Special key
-        if key == keyboard.Key.space:
-            shortcut = listToString(keys)
-            is_runcommand = False
+    if shortcut.lower() == data[6].lower():  # paste snippet
+        content = data[3]
 
-            if shortcut.startswith('.'):
-                is_runcommand = True
-                shortcut = shortcut[1:]  # remove first char
+        if (data != None):
+            output = helper.execute(content)
 
-            data = helper.db.search_by_shortcut(shortcut)
-
-            if (data != None and shortcut != ''):
-                if shortcut.lower() == data[6].lower():  # paste snippet
-                    content = data[3]
-
-                    if is_runcommand == True:  # run command
-                        old_shortcut = '.' + shortcut
-                        delText(old_shortcut)
-                        output = helper.execute(content)
-                        print(output)
-                        copy_paste(output)
-                    else:  # paste content of shortcut
-                        delText(shortcut)
-
-                        copy_paste(content)
-
-            keys.clear()
-
-        elif key == keyboard.Key.enter:
-            keys.clear()
-
-def copy_paste(content):
-    pyperclip.copy(content)
-    # Retrieve the text from the clipboard
-    pasted_text = pyperclip.paste()
-    # Press and release Ctrl+V
-    with kb.pressed(Key.ctrl):
-        kb.press('v')
-        kb.release('v')
-    time.sleep(1)
-    pyperclip.copy('')
-
-    # Add other special keys as needed
-
-
-def listToString(s):
-    # Initialize an empty string
-    str1 = ""
-    # Ensure s is a list or tuple of strings
-    if isinstance(s, (list, tuple)):
-        # Return string
-        return str1.join(s)
-    else:
-        raise ValueError("The argument must be an iterable of strings")
-
-def delText(s):
-    for i in range(len(s)+2):
-        kb.press(Key.backspace)
-        kb.release(Key.backspace)
 
 def show_popup(event=None):
     global popup
@@ -151,10 +88,6 @@ def show_popup(event=None):
 popup = None  # Initialize popup variable
 
 
-# Set up the listener in a non-blocking fashion
-listener = keyboard.Listener(on_press=on_press)
-listener.start()
-
 # Create the main window
 root = ttk.Window(themename="darkly")
 root.bind("<KeyPress>", on_esc_key)  # Bind to any key press
@@ -170,9 +103,9 @@ root.overrideredirect(True)
 searchbox = ttk.Entry(root)
 searchbox.pack(padx=10, pady=10, fill="x")
 # Initially set a larger font size
-searchbox.configure(font=('TkDefaultFont', 12))
+searchbox.configure(font=('TkDefaultFont', 11))
 # Load the search icon image (replace 'search_icon.png' with your image path)
-search_icon = ttk.PhotoImage(file='image/search24px.png')
+search_icon = ttk.PhotoImage(file='image/search32px.png')
 
 # Create a label to display the icon
 icon_label = ttk.Label(searchbox, image=search_icon)
@@ -184,8 +117,9 @@ searchbox.focus_set()
 # Bind the focus out event to the entry widget
 searchbox.bind("<FocusOut>", on_focus_out)
 searchbox.bind("<KeyRelease>", show_popup)
+searchbox.bind('<KeyRelease-Return>', run_command)
 
-root.geometry("400x50")
+root.geometry("400x60")
 root.update_idletasks()
 
 # Calculate the offset to center the window
