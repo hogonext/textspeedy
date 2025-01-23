@@ -149,10 +149,7 @@ def show_popup(event=None):
 
     treeview.pack(padx=5, pady=5)
 
-    popup.after(5000, popup.destroy)
-
 popup = None  # Initialize popup variable
-
 
 
 # Set up the listener in a non-blocking fashion
