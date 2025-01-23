@@ -110,19 +110,13 @@ def show_popup(event=None):
         popup.destroy()
 
     word = searchbox.get()
-    print(word)    
     if word:
-        data = helper.db.search_note_item_by_title_for_treeview(searchbox.get())
+        data = helper.db.search_note_item_by_title_for_treeview(word)
 
-
-        car_brands = ["Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Mercedes-Benz",
-                    "Audi", "Nissan", "Hyundai", "Kia", "Volkswagen", "Volvo", "Mazda"]
         converted_array = [f"{item[2]} {item[1]}" for item in data]
         print(converted_array)
 
         suggestions = [brand for brand in converted_array if word.lower() in brand.lower()]
-        #suggestions = [brand for brand in car_brands if word.lower() in brand.lower()]
-        print(suggestions)
 
     if not suggestions:
         return
