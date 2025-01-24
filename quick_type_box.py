@@ -2,15 +2,6 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 
 import helper
-import pyperclip
-import time
-
-from pynput import keyboard
-from pynput.keyboard import Key, Controller
-
-keys = []
-
-kb = Controller()
 
 quick_type = False
 
@@ -49,7 +40,6 @@ def show_popup(event=None):
     word = searchbox.get()
     if word:
         data = helper.db.search_note_item_by_title_for_treeview(word)
-
         converted_array = [f"{item[2]} {item[1]}" for item in data]
         
         suggestions = [brand for brand in converted_array if word.lower() in brand.lower()]
@@ -83,10 +73,11 @@ def show_popup(event=None):
         parts = suggestion.split(' ', 1)  # Tách chuỗi thành hai phần
         treeview.insert("", "end", values=(parts[0], parts[1]))
 
+    
+
     treeview.pack(padx=5, pady=5)
 
 popup = None  # Initialize popup variable
-
 
 # Create the main window
 root = ttk.Window(themename="darkly")

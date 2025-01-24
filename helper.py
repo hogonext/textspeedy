@@ -1,12 +1,13 @@
 import sys
 import io
 import os
+import os
+import json
 import tempfile
 import re
 from collections import OrderedDict
 
 import requests
-from bs4 import BeautifulSoup
 
 import base64
 import xml.etree.ElementTree as ET
@@ -24,6 +25,8 @@ from datetime import datetime
 from tkinter.font import Font
 
 from database import Database
+
+executable_apps = {}
 
 db = Database()
 
@@ -355,3 +358,192 @@ def plaintext_to_html(text):
   #html_text = html_text.replace(">", "&gt;")
   html_text = html_text.replace("\n", "<br>\n")
   return f"<p>{html_text}</p>"
+
+def scan_all_executables(output_file="executables.json"):
+    """Scans all drives and directories on Windows for executable files 
+    and saves their names and paths to a JSON file.
+
+    Args:
+      output_file: The name of the JSON file to save the results.
+    """
+
+    executables = []
+    for drive in range(ord('A'), ord('Z') + 1):  # Check drives from A to Z
+        drive_letter = chr(drive)
+        drive_path = drive_letter + ":\\"
+        if os.path.exists(drive_path):
+            for root, _, files in os.walk(drive_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    if file.lower().endswith(('.exe', '.bat', '.cmd', '.com', '.ps1')):
+                        executables.append({
+                            "name": file,
+                            "path": file_path
+                        })
+
+    with open(output_file, 'w') as f:
+        json.dump(executables, f, indent=2)
+
+    print(f"Executable information saved to {output_file}")
+
+
+# --- File Operations ---
+def read_json_file(filename="settings.json"):
+    """Reads data from a JSON file.
+
+    Args:
+      filename: The name of the JSON file.
+
+    Returns:
+      A Python dictionary containing the data from the JSON file.
+    """
+    try:
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        return data
+    except FileNotFoundError:
+        print(f"File '{filename}' not found.")
+        return None
+
+def write_json_file(data, filename="settings.json"):
+    """Writes data to a JSON file.
+
+    Args:
+      data: The data to write, typically a dictionary.
+      filename: The name of the JSON file.
+    """
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=2)  # indent for pretty printing
+
+
+# --- Search Operations ---
+def search_in_json_object(data, search_key):
+    """Searches for a key in a JSON object (dictionary).
+
+    Args:
+      data: The JSON object (dictionary).
+      search_key: The key to search for.
+
+    Returns:
+      The value associated with the key if found, otherwise None.
+    """
+    if search_key in data:
+        return data[search_key]
+    else:
+        return None
+
+def search_in_json_array(data, search_key, search_value):
+    """Searches for a value associated with a key in a JSON array of objects.
+
+    Args:
+      data: The JSON array of objects.
+      search_key: The key to search within each object.
+      search_value: The value to search for.
+
+    Returns:
+      The object where the key-value pair is found, otherwise None.
+    """
+    for item in data:
+        if item.get(search_key) == search_value:
+            return item
+    return None
+
+def update_json_value(filename, key, new_value):
+    """Updates a single setting in a JSON file with the structure {key: value}.
+
+    Args:
+      filename: The name of the JSON file.
+      key: The key of the setting to update.
+      new_value: The new value for the setting.
+    """
+    try:
+        # 1. Read the existing settings
+        with open(filename, 'r') as f:
+            settings = json.load(f)
+
+        # 2. Update the specific key
+        if key in settings:
+            settings[key] = new_value
+        else:
+            print(f"Key '{key}' not found in settings.")
+
+        # 3. Write the updated settings back to the file
+        with open(filename, 'w') as f:
+            json.dump(settings, f, indent=2)
+
+    except FileNotFoundError:
+        print(f"File '{filename}' not found.")
+
+def get_json_value(filename, key):
+  """Gets the value of a specific key from a JSON file with the structure {key: value}.
+
+  Args:
+    filename: The name of the JSON file.
+    key: The key to retrieve the value for.
+
+  Returns:
+    The value associated with the key if found, otherwise None.
+  """
+  try:
+    with open(filename, 'r') as f:
+      file = json.load(f)
+
+    if key in file:
+      return file[key]
+    else:
+      print(f"Key '{key}' not found in settings.")
+      return None
+
+  except FileNotFoundError:
+    print(f"File '{filename}' not found.")
+    return None
+  
+def search_executables(search_key):
+    import fnmatch  # For wildcard matching
+
+    """Searches for executables using 'like' logic (with wildcards) 
+    and returns an array of [name, path] for matching entries.
+    """
+    json_file = "executables.json"
+
+    try:
+        with open(json_file, 'r') as f:
+            filtered_executables = []
+            for line in f:
+                try:
+                    exe = json.loads(line)
+                    for key, value in exe.items():
+                        if fnmatch.fnmatch(str(value).lower(), f"*{search_key.lower()}*"):
+                            filtered_executables.append([exe['name'], exe['path']])
+                            break
+                except json.JSONDecodeError:
+                    pass
+        return filtered_executables
+    except FileNotFoundError:
+        print(f"File '{json_file}' not found.")
+        return []
+    
+def load_executables():
+        json_file = "executables.json"
+
+        """Loads executable data from the JSON file into the static variable."""
+        try:
+            with open(json_file, 'r') as f:
+                data = json.load(f)
+                # Convert list of dictionaries to dictionary with 'name' as key
+                list = {exe['name']: exe['path'] for exe in data}
+            return list
+            print("Executables loaded successfully.")
+        except FileNotFoundError:
+            print(f"File '{json_file}' not found.")
+
+def dict_to_array(my_dict):
+  """Converts a dictionary to an array of [key, value] pairs.
+
+  Args:
+    my_dict: The dictionary to convert.
+
+  Returns:
+    An array of [key, value] pairs.
+  """
+  return [[key, value] for key, value in my_dict.items()]
