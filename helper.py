@@ -547,3 +547,22 @@ def dict_to_array(my_dict):
     An array of [key, value] pairs.
   """
   return [[key, value] for key, value in my_dict.items()]
+
+
+def write_to_file(file_path, content, mode="w"):
+  """
+  Writes content to a file.
+
+  Args:
+    file_path: The path to the file.
+    content: The content to write to the file.
+    mode: The file opening mode. 
+          "w" (default): Write mode (overwrites the file if it exists).
+          "a": Append mode (adds content to the end of the file).
+  """
+  try:
+    with open(file_path, mode) as file:
+      file.write(content)
+    print(f"Content written to '{file_path}'")
+  except OSError as error:
+    print(f"Error writing to file: {error}")

@@ -1,3 +1,5 @@
+import os
+import shutil
 import sys
 import tkinter as tk
 import webbrowser
@@ -18,16 +20,13 @@ import helper
 import webview
 import markdown
 
-current_version = "1.1"
+current_version = "1.2"
+root_dir = os.getcwd() + '/data/'
 
-selected_node_id = ''
-selected_node_category = 'All Categories'  # default
 selected_node_shortcut = ''
-selected_node_title = ''
 selected_note_content = ''
 
-# Function to center the dialog in the root window
-
+selected_path ='' #file or folder path
 
 def center_dialog(dialog):
     root.update_idletasks()
@@ -41,32 +40,6 @@ def center_dialog(dialog):
 def clear_treeview(treeview):
     for item in treeview.get_children():
         treeview.delete(item)
-
-
-def combobox_selected_value(event):
-    load_nodes(treeview)
-    select_first_item(treeview)
-
-
-def load_nodes(treeview):
-    global selected_node_category
-    clear_treeview(treeview)
-    selected_node_category = combobox.get()
-    data = helper.db.get_all_note_by_category_for_treeview(
-        selected_node_category)
-    for item in data:
-        treeview.insert("", "end", values=(
-            item[0], item[1], item[2]))  # id, title, shortcut
-
-
-def load_nodes_by_search(treeview):
-    global selected_node_category
-    clear_treeview(treeview)
-    data = helper.db.search_note_item_by_title_for_treeview(searchbox.get())
-    for item in data:
-        treeview.insert("", "end", values=(
-            item[0], item[1], item[2]))  # id, title, shortcut
-
 
 def treeview_has_items(treeview):
     for item in treeview.get_children():
@@ -95,93 +68,17 @@ def update_editor(editor, new_content):
     helper.highlight_markdown(editor)
 
 
-def on_select_treeview(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title, status_label, selected_note_content
-
-    status_label.config(text='')
-
-    update_editor(editor, '')
-
-    # Event handler for treeview
-    curItem = treeview.focus()  # Get the ID of the focused item
-    item_dict = treeview.item(curItem)  # Get the item dictionary
-    values = item_dict['values']  # Get the values list from the
-
-    selected_node_id = values[0]
-
-    data = helper.db.get_note_item_by_id(selected_node_id)
-
-    selected_node_category = data[1]
-    selected_node_title = data[2]
-    selected_node_shortcut = data[6]
-
-    selected_note_content = data[3] + ''
-
-    update_editor(editor, selected_note_content)
-
-    update_status_label('')
-
-
 def on_text_change(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title, selected_note_content
+    global selected_path, selected_node_category, selected_node_shortcut, selected_node_title, selected_note_content
 
     try:
         selected_note_content = editor.get("1.0", "end-1c")
-        helper.db.update_note_item(
-            selected_node_id, selected_node_category, selected_node_title, selected_note_content, helper.get_local_date_time(), selected_node_shortcut)
+        helper.write_to_file(selected_path,selected_note_content)
         helper.highlight_markdown(editor)
         update_status_label('')
 
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
-def on_search_change(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title, selected_note_content
-
-    try:
-        load_nodes_by_search(treeview)
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-def create_new_note(event):
-
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
-
-    selected_node_title = 'New Note'
-
-    selected_node_category = combobox.get()
-
-    local_date_time = helper.get_local_date_time()
-
-    helper.db.insert_note_item(selected_node_category, selected_node_title,
-                               '', local_date_time, local_date_time, '')
-    load_nodes(treeview)
-
-    select_first_item(treeview)
-
-
-def change_note_title(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
-
-    # center_dialog(dialog)
-
-    selected_node_title = simpledialog.askstring(
-        title="Change title", prompt="Enter new title:\t\t\t\t\t", initialvalue=selected_node_title
-    )
-
-    if selected_node_title != None and selected_node_title != "":
-
-        new_content = editor.get("1.0", "end-1c")
-        helper.db.update_note_item(
-            selected_node_id, selected_node_category, selected_node_title, new_content, helper.get_local_date_time(), selected_node_shortcut)
-
-        load_nodes(treeview)
-
-        select_first_item(treeview)
-
 
 def change_note_shortcut(event):
     global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
@@ -196,214 +93,7 @@ def change_note_shortcut(event):
         helper.db.update_note_item(
             selected_node_id, selected_node_category, selected_node_title, new_content, helper.get_local_date_time(), selected_node_shortcut)
 
-        load_nodes(treeview)
-
         select_first_item(treeview)
-
-
-def delete_note(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
-
-    answer = messagebox.askyesno(title='Confirmation',
-                                 message='Are you sure that you want to delete this note?')
-
-    if answer:
-        helper.db.delete_note_item(selected_node_id)
-        load_nodes(treeview)
-        select_first_item(treeview)
-
-
-def rename_note_category(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
-
-    old_category = combobox.get()
-
-    if old_category == 'All Categories':
-        messagebox.showwarning(
-            'Warning!', 'You cannot rename All Categories item. It is the default category.')
-        return
-
-    new_category = simpledialog.askstring(
-        title="Rename Category", prompt="Enter new category name:\t\t\t\t\t", initialvalue=selected_node_category
-    )
-
-    if new_category != None and new_category != "":
-
-        # ignore on existing category
-        helper.db.update_note_category(old_category, new_category)
-        helper.db.update_all_note_categories(old_category, new_category)
-
-        if new_category != selected_node_category:
-            combo_values = helper.db.get_all_note_category()
-            combobox['values'] = [
-                item for sublist in combo_values for item in sublist]
-            # Set the default value (optional)
-            selected_node_category = new_category
-            combobox.set(selected_node_category)
-
-        load_nodes(treeview)
-        select_first_item(treeview)
-
-
-def create_note_category(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
-
-    new_category = simpledialog.askstring(
-        title="Create New Category", prompt="Enter new category:\t\t\t\t\t"
-    )
-
-    if new_category != None and new_category != "":
-
-        # ignore on existing category
-        helper.db.insert_note_category(new_category)
-
-        if new_category != selected_node_category:
-            combo_values = helper.db.get_all_note_category()
-            combobox['values'] = [
-                item for sublist in combo_values for item in sublist]
-            # Set the default value (optional)
-            selected_node_category = new_category
-            combobox.set(selected_node_category)
-
-        load_nodes(treeview)
-        select_first_item(treeview)
-
-
-def update_note_category(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
-
-    new_category = simpledialog.askstring(
-        title="Change category", prompt="Enter new category:\t\t\t\t\t", initialvalue=selected_node_category
-    )
-
-    if new_category != None and new_category != "":
-
-        # ignore on existing category
-        helper.db.insert_note_category(new_category)
-
-        local_date_time = helper.get_local_date_time()
-
-        helper.db.update_note_item_category(
-            selected_node_id, new_category, local_date_time)
-
-        if new_category != selected_node_category:
-            combo_values = helper.db.get_all_note_category()
-            combobox['values'] = [
-                item for sublist in combo_values for item in sublist]
-            # Set the default value (optional)
-            selected_node_category = new_category
-            combobox.set(selected_node_category)
-
-        load_nodes(treeview)
-        select_first_item(treeview)
-
-
-def delete_note_category(event):
-
-    deleted_note_category = combobox.get()
-
-    if deleted_note_category == 'All Categories':
-        messagebox.showwarning(
-            'Warning!', 'You cannot delete All Categories item. It is the default category.')
-        return
-
-    answer = messagebox.askyesno(title='Confirmation',
-                                 message='Are you sure that you want to delete this category?')
-
-    if answer:
-        helper.db.delete_note_category(deleted_note_category)
-        helper.db.update_all_note_categories(
-            deleted_note_category, 'All Categories')
-
-        combo_values = helper.db.get_all_note_category()
-        combobox['values'] = [
-            item for sublist in combo_values for item in sublist]
-        combobox.set('All Categories')  # set to defautl Note Category
-
-        load_nodes(treeview)
-        select_first_item(treeview)
-
-
-def edit_cell(event):
-    """Enables editing of the selected cell in the Treeview."""
-    selected_item = event.widget.focus()
-    column = event.widget.identify_column(event.x)
-    column_index = int(column[1:]) - 1  # Extract column index
-
-    # Create an Entry widget for editing
-    entry = ttk.Entry(event.widget)
-    entry.insert(0, event.widget.item(selected_item)['values'][column_index])
-    entry.column_index = column_index
-
-    def save_edited_value(event):
-        """Saves the edited value and destroys the Entry widget."""
-        edited_value = event.widget.get()
-        event.widget.destroy()
-
-        # Update the Treeview with the edited value
-        event.widget.item(selected_item, values=(edited_value,))
-
-    # Bind events to save the edited value when Enter is pressed or focus is lost
-    entry.bind("<Return>", save_edited_value)
-    entry.bind("<FocusOut>", save_edited_value)
-
-    # Place the Entry widget in the selected cell
-    event.widget.update_idletasks()
-    cell_bbox = event.widget.bbox(selected_item, column)
-    entry.place(x=cell_bbox[0], y=cell_bbox[1], width=cell_bbox[2] -
-                cell_bbox[0], height=cell_bbox[3] - cell_bbox[1])
-    entry.focus_set()
-    entry.selection_range(0, tk.END)
-
-
-def on_treeview_double_click(event):
-    # Get the item clicked
-    item = treeview.identify('item', event.x, event.y)
-    if item:
-        # Determine the column clicked
-        column = treeview.identify_column(event.x)
-        entry_popup_treeview_item(item, column)
-
-
-def entry_popup_treeview_item(item, column):
-    # Create a popup entry widget
-    x, y, width, height = treeview.bbox(item, column)
-    entry = tk.Entry(treeview, width=width//8)
-    entry.place(x=x, y=y, width=width, height=height)
-    entry.focus()
-
-    column_index = int(column.replace("#", "")) - 1
-    # Set the entry widget's text to the current value of the cell
-    entry.insert(0, treeview.item(item, "values")[column_index])
-
-    def on_entry_save(event):
-
-        treeview.set(item, column=column[0:], value=entry.get())
-        entry.destroy()
-
-        global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
-
-        item_dict = treeview.item(item)  # Get the item dictionary
-        values = item_dict['values']  # Get the values list from the
-
-        selected_node_title = values[1]
-        selected_node_shortcut = values[2]
-
-        new_content = editor.get("1.0", "end-1c")
-        helper.db.update_note_item(
-            selected_node_id, selected_node_category, selected_node_title, new_content, helper.get_local_date_time(), selected_node_shortcut)
-
-        load_nodes(treeview)
-
-        select_first_item(treeview)
-
-    def on_entry_cancel(event):
-        entry.destroy()
-
-    entry.bind('<Return>', on_entry_save)
-    entry.bind('<Escape>', on_entry_cancel)
-    entry.bind("<FocusOut>", on_entry_save)
-
 
 def on_right_click_treeview(event):
     # Identify the row clicked
@@ -447,8 +137,7 @@ def update_status_label(event_type):
         cursor_position = editor.index(tk.INSERT)  # Get the cursor position
     line, _ = cursor_position.split('.')  # Extract the line number
 
-    info = "Title: " + selected_node_title + " | " + "Category: " + \
-        selected_node_category + " | " + "Shortcut: " + selected_node_shortcut
+    info = "Shortcut: " + selected_node_shortcut
 
     info = info + " | " + "Words: " + word_count + \
         " | " + " | " + "Lines: " + total_lines
@@ -513,10 +202,183 @@ def display_text_utility(event):
 def display_settings_dialog(event):
     settings_dialog.display()
 
+
+def populate_treeview(tree, parent, path):
+    text_formats = ('.md', '.txt', '.py', '.json','html','css','js')
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        if os.path.isdir(item_path):
+            node = tree.insert(parent, 'end', text=item, open=False)
+            populate_treeview(tree, node, item_path)
+        elif item_path.endswith(text_formats):
+            tree.insert(parent, 'end', text=item)
+
+def filter_tree(tree, path, search_text=""):
+    """
+    Handles treeview population and filtering for files and directories.
+
+    Args:
+        tree: The ttk.Treeview widget.
+        path: The path to the directory to display.
+        search_text: The text to filter the tree by.
+    """
+
+    text_formats = ('.md', '.txt', '.py', '.json', '.html', '.css', '.js')
+
+    def populate_treeview(parent, path):
+        for item in os.listdir(path):
+            item_path = os.path.join(path, item)
+            if os.path.isdir(item_path):
+                if search_text.lower() in item.lower():
+                    node = tree.insert(parent, 'end', text=item, open=False)
+                    populate_treeview(node, item_path)
+                else:
+                    # Check if any children match the search text
+                    has_matching_children = False
+                    for child in os.listdir(item_path):
+                        if search_text.lower() in child.lower():
+                            has_matching_children = True
+                            break
+                    if has_matching_children:
+                        node = tree.insert(parent, 'end', text=item, open=False)
+                        populate_treeview(node, item_path)
+            elif item_path.endswith(text_formats):
+                if search_text.lower() in item.lower():
+                    tree.insert(parent, 'end', text=item)
+
+    tree.delete(*tree.get_children())  # Clear the treeview
+    populate_treeview('', path)
+
+def create_new_folder(tree, path):
+    selected_item = tree.selection()
+    if selected_item:
+        parent_folder = tree.item(selected_item, 'text')
+        parent_path = os.path.join(path, parent_folder)
+        if os.path.isdir(parent_path):
+            new_folder_name = simpledialog.askstring("New Folder", "Enter folder name:\t\t\t\t\t",initialvalue='New folder')
+            if new_folder_name:                
+                new_folder_path = os.path.join(parent_path, new_folder_name)
+                os.makedirs(new_folder_path, exist_ok=True)
+                tree.insert(selected_item, 'end', text=new_folder_name)
+                tree.item(selected_item, open=True)
+        else:
+            messagebox.showerror("Error", "Selected item is not a folder")
+    else:
+        messagebox.showerror("Error", "No folder selected")
+
+def create_new_file(tree, path):
+    selected_item = tree.selection()
+    if selected_item:
+        parent_folder = tree.item(selected_item, 'text')
+        parent_path = os.path.join(path, parent_folder)
+        if os.path.isdir(parent_path):
+            new_file_name = simpledialog.askstring("New File", "Enter file name:\t\t\t\t\t")
+            if new_file_name:
+                root, ext = os.path.splitext(new_file_name)
+                if not ext:
+                    new_file_name = new_file_name + '.md'
+                new_file_path = os.path.join(parent_path, new_file_name)
+                with open(new_file_path, 'w') as file:
+                    file.write("")  # Create an empty file
+                tree.insert(selected_item, 'end', text=new_file_name)
+                tree.item(selected_item, open=True)
+        else:
+            messagebox.showerror("Error", "Selected item is not a folder")
+    else:
+        messagebox.showerror("Error", "No folder selected")
+
+def delete_item(tree, path):
+
+    answer = messagebox.askyesno(title='Confirmation',
+                                 message='Are you sure that you want to delete this note?')
+
+    if not answer: 
+        return        
+
+    selected_item = tree.selection()
+    if selected_item:
+        item_name = tree.item(selected_item, 'text')
+        item_path = os.path.join(path, item_name)
+        if os.path.isdir(item_path):
+            shutil.rmtree(item_path)
+        elif os.path.isfile(item_path):
+            os.remove(item_path)
+        tree.delete(selected_item)
+    else:
+        messagebox.showerror("Error", "No item selected")
+
+def show_file_content(tree, path, text_widget):
+    global selected_path
+    text_widget.delete(1.0, tk.END)
+
+    selected_item = tree.selection()
+    if selected_item:
+        file_path=generate_path(tree, selected_item[0])
+        selected_path = os.path.join(path, file_path)
+        if os.path.isfile(selected_path):
+            with open(selected_path, 'r') as file:
+                content = file.read()
+                text_widget.delete(1.0, tk.END)
+                text_widget.insert(tk.END, content)
+                helper.highlight_markdown(editor)
+                update_status_label('')
+
+
+def rename_item(tree, path):
+    selected_item = tree.selection()
+    if selected_item:
+        old_name = tree.item(selected_item, 'text')
+        old_path = os.path.join(path, old_name)
+        new_name = simpledialog.askstring("Rename", "Enter new name:\t\t\t\t\t", initialvalue=old_name)
+        if new_name:
+            new_path = os.path.join(path, new_name)
+            os.rename(old_path, new_path)
+            tree.item(selected_item, text=new_name)
+
+def filter_treeview(tree, search_text):
+    def recursive_filter(item):
+        item_text = tree.item(item, 'text')
+        if search_text.lower() in item_text.lower():
+            tree.item(item, open=True)
+            tree.see(item)
+        else:
+            tree.item(item, open=False)
+        
+        for child in tree.get_children(item):
+            recursive_filter(child)
+
+    for item in tree.get_children():
+        recursive_filter(item)
+
+def refresh_tree(tree, parent, path):
+    clear_treeview(tree)
+    populate_treeview(treeview,parent, path)
+
+def generate_path(tree, selected_item):
+    """
+    Gets the concatenated string from the root node to the selected node 
+    of a tkinter Treeview.
+    """
+
+    path = []
+    current_item = selected_item
+
+    while current_item != '':
+        path.append(tree.item(current_item)['text'])
+        current_item = tree.parent(current_item)
+
+    return '/'.join(path[::-1])  # Reverse the list to get root first
+
+def on_search_change(event):
+    global root_dir
+
+    search_text = searchbox.get()
+    clear_treeview(treeview)
+
+    filter_tree(treeview, root_dir, search_text)
+
 def create_app():
-    global root, treeview, editor, status_label, combobox, searchbox
-    # root = tk.Tk()
-    # root = ttk.Window(themename="darkly")
+    global root, treeview, editor, status_label, searchbox
 
     new_version = helper.get_website_content("https://hogonext.com/textspeedy-vesion.html")
 
@@ -534,9 +396,9 @@ def create_app():
     menubar = Menu(root)
     file_menu = Menu(menubar, tearoff=0)
     file_menu.add_command(
-        label="New Note", command=lambda event=None: create_new_note(event), accelerator="Ctrl+N")
-    file_menu.add_command(label="New Note Category",
-                          command=lambda event=None: create_note_category(event))
+        label="New Note", command=lambda event=None: create_new_file(event), accelerator="Ctrl+N")
+    file_menu.add_command(label="New Folder",
+                          command=lambda event=None: create_new_folder(event))
 
     file_menu.add_separator()
     file_menu.add_command(
@@ -580,7 +442,6 @@ def create_app():
     status_frame = tk.Frame(right_frame)
     status_frame.pack(side="bottom", fill="x")
 
-    # Textbox above the Combobox
     searchbox = tk.Entry(left_frame)
     searchbox.pack(side="top", fill="x")
     # Bind the key release event to the entry widget
@@ -593,39 +454,21 @@ def create_app():
     icon_label = tk.Label(searchbox, image=search_icon)
     icon_label.pack(side="right")  # Place the icon on the right side
 
-    # Combobox above the Treeview
-    combobox = ttk.Combobox(left_frame)
-    combobox.state(["readonly"])
-
-    combo_values = helper.db.get_all_note_category()
-    # Flatten the list of tuples and add the values to the combobox
-    combobox['values'] = [item for sublist in combo_values for item in sublist]
-    # Set the default value (optional)
-    combobox.set('All Categories')
-    combobox.pack(side="top", fill="x")
-
     # List on the left
 
-    treeview = ttk.Treeview(left_frame, columns=(
-        "id", "title", "shortcut"), show="headings")
-    treeview.heading("id", text="ID")
-    treeview.heading("title", text="Title", anchor='w')
-    treeview.heading("shortcut", text="Shortcut", anchor='w')
-
-    treeview.column("id", width=0, stretch=tk.NO)
-    treeview.column("title", width=250, anchor='w')
-    treeview.column("shortcut", width=60, anchor='w')
-
+    treeview = ttk.Treeview(left_frame,show='tree')
     treeview.pack(side="left", fill="y")
 
+    populate_treeview(treeview, '', root_dir)
+    
     # Create and pack the scrollbars for the Treeview and Text widget
     treeview_scrollbar = tk.Scrollbar(
         left_frame, orient="vertical", command=treeview.yview)
     treeview.config(yscrollcommand=treeview_scrollbar.set)
     treeview_scrollbar.pack(side="left", fill="y")
 
-    treeview.bind('<<TreeviewSelect>>', on_select_treeview)
-    treeview.bind('<Double-1>', on_treeview_double_click)
+    # Bind the Treeview selection event to show file content
+    treeview.bind('<<TreeviewSelect>>', lambda event: show_file_content(treeview, root_dir, editor))
 
     # Text widget on the right
     editor = tk.Text(right_frame, wrap="word")
@@ -646,11 +489,11 @@ def create_app():
 
     # UI end block code
 
-    load_nodes(treeview)
+    #load_nodes(treeview)
     select_first_item(treeview)
 
-    root.bind('<Control-n>', create_new_note)
-    root.bind('<Control-d>', delete_note)
+    root.bind('<Control-n>', create_new_file)
+    root.bind('<Control-d>', delete_item)
     root.bind('<Control-l>', live_preview)
     root.bind('<Control-e>', send_emai)
     root.bind('<F4>', display_settings_dialog)
@@ -659,26 +502,23 @@ def create_app():
     root.bind('<F9>', run_code_live_output)
     root.bind('<F10>', publish_WP)
 
-    # Bind the event handler to the selection event
-    combobox.bind('<<ComboboxSelected>>', combobox_selected_value)
-
     # Create the popup menu
     global popup_menu_treeview
     popup_menu_treeview = tk.Menu(root, tearoff=0)
     popup_menu_treeview.add_command(
-        label="New Note", command=lambda event=None: create_new_note(event), accelerator="Ctrl+N")
+        label="Create New File", command=lambda event=None: create_new_file(treeview, root_dir), accelerator="Ctrl+N")
     popup_menu_treeview.add_command(
-        label="Change Title", command=lambda event=None: change_note_title(event))
+        label="Create New Folder", command=lambda event=None: create_new_folder(treeview, root_dir))
     popup_menu_treeview.add_command(
         label="Change Shortcut", command=lambda event=None: change_note_shortcut(event))
     popup_menu_treeview.add_command(
-        label="Delete Note", command=lambda event=None: delete_note(event), accelerator="Ctrl+D")
+        label="Delete Item", command=lambda event=None: delete_item(treeview, root_dir), accelerator="Ctrl+D")
     popup_menu_treeview.add_command(
-        label="New Category", command=lambda event=None: create_note_category(event))
+        label="Rename Item", command=lambda event=None: rename_item(treeview, root_dir))
     popup_menu_treeview.add_command(
-        label="Rename Category", command=lambda event=None: rename_note_category(event))
-    popup_menu_treeview.add_command(
-        label="Delete Category", command=lambda event=None: delete_note_category(event))
+        label="Refresh", command=lambda event=None: refresh_tree(treeview,'', root_dir), accelerator="Ctrl+F5")
+   
+
 
     # Bind the right click event to the Treeview
     treeview.bind('<Button-3>', on_right_click_treeview)
@@ -686,8 +526,6 @@ def create_app():
     # Create the popup menu
     global popup_menu_text
     popup_menu_text = tk.Menu(root, tearoff=0)
-    popup_menu_text.add_command(
-        label="Change Category", command=lambda event=None: update_note_category(event))
     popup_menu_text.add_command(
         label="Live Preview", command=lambda event=None: live_preview(event), accelerator="Ctrl+L")
     popup_menu_text.add_command(
@@ -736,7 +574,7 @@ def create_app():
 
     helper.center_window(root, 1360, 768)
 
-    hide_window()
+    #hide_window()
 
     root.mainloop()
 
