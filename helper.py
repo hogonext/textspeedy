@@ -563,6 +563,5 @@ def write_to_file(file_path, content, mode="w"):
   try:
     with open(file_path, mode) as file:
       file.write(content)
-    print(f"Content written to '{file_path}'")
   except OSError as error:
     print(f"Error writing to file: {error}")

@@ -335,20 +335,6 @@ def rename_item(tree, path):
             os.rename(old_path, new_path)
             tree.item(selected_item, text=new_name)
 
-def filter_treeview(tree, search_text):
-    def recursive_filter(item):
-        item_text = tree.item(item, 'text')
-        if search_text.lower() in item_text.lower():
-            tree.item(item, open=True)
-            tree.see(item)
-        else:
-            tree.item(item, open=False)
-        
-        for child in tree.get_children(item):
-            recursive_filter(child)
-
-    for item in tree.get_children():
-        recursive_filter(item)
 
 def refresh_tree(tree, parent, path):
     clear_treeview(tree)
