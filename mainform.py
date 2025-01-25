@@ -23,10 +23,12 @@ import markdown
 current_version = "1.2"
 root_dir = os.getcwd() + '/data/'
 
-selected_node_shortcut = ''
+selected_node_title = ''
+selected_shortcut = ''
 selected_note_content = ''
 
-selected_path ='' #file or folder path
+selected_path = ''  # file or folder path
+
 
 def center_dialog(dialog):
     root.update_idletasks()
@@ -40,6 +42,7 @@ def center_dialog(dialog):
 def clear_treeview(treeview):
     for item in treeview.get_children():
         treeview.delete(item)
+
 
 def treeview_has_items(treeview):
     for item in treeview.get_children():
@@ -69,31 +72,33 @@ def update_editor(editor, new_content):
 
 
 def on_text_change(event):
-    global selected_path, selected_node_category, selected_node_shortcut, selected_node_title, selected_note_content
+    global selected_path, selected_shortcut, selected_note_content
 
     try:
         selected_note_content = editor.get("1.0", "end-1c")
-        helper.write_to_file(selected_path,selected_note_content)
+        helper.write_to_file(selected_path, selected_note_content)
         helper.highlight_markdown(editor)
         update_status_label('')
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def change_note_shortcut(event):
-    global selected_node_id, selected_node_category, selected_node_shortcut, selected_node_title
 
-    selected_node_shortcut = simpledialog.askstring(
-        title="Change shortcut", prompt="Enter new shortcut:\t\t\t", initialvalue=selected_node_shortcut
+def update_shortcut(event):
+    global selected_path, selected_shortcut, selected_node_title
+
+    new_shortcut = simpledialog.askstring(
+        title="Update shortcut", prompt="Enter new shortcut:\t\t\t", initialvalue=selected_shortcut
     )
 
-    if selected_node_shortcut != None and selected_node_shortcut != "":
+    if selected_shortcut != None and selected_shortcut != "":
+        helper.update_json_key(
+            'shortcuts.json', selected_shortcut, new_shortcut)
+        helper.add_or_update_key(
+            'shortcuts.json', new_shortcut, selected_path.replace(root_dir, ''))
+        selected_shortcut = new_shortcut
+        populate_treeview(treeview,'',root_dir)
 
-        new_content = editor.get("1.0", "end-1c")
-        helper.db.update_note_item(
-            selected_node_id, selected_node_category, selected_node_title, new_content, helper.get_local_date_time(), selected_node_shortcut)
-
-        select_first_item(treeview)
 
 def on_right_click_treeview(event):
     # Identify the row clicked
@@ -122,6 +127,7 @@ def on_left_click_editor(event):
 
 
 def update_status_label(event_type):
+
     content = editor.get("1.0", tk.END)
 
     word_count = str(helper.count_words(content))
@@ -137,7 +143,7 @@ def update_status_label(event_type):
         cursor_position = editor.index(tk.INSERT)  # Get the cursor position
     line, _ = cursor_position.split('.')  # Extract the line number
 
-    info = "Shortcut: " + selected_node_shortcut
+    info = "File: " + selected_node_title + " | " + "Shortcut: " + selected_shortcut
 
     info = info + " | " + "Words: " + word_count + \
         " | " + " | " + "Lines: " + total_lines
@@ -191,27 +197,34 @@ def publish_WP(event):
 
     messagebox.showinfo('Publish Wordpress',
                         'This note is published successfully')
+
+
 def display_about(event):
-    content = 'Version:' + current_version + "\n" + "Website: https://hogonext.com/textspeedy"
+    content = 'Version:' + current_version + "\n" + \
+        "Website: https://hogonext.com/textspeedy"
     messagebox.showinfo('TextSpeedy', content)
+
 
 def display_text_utility(event):
     import text_utility
     text_utility.display()
+
 
 def display_settings_dialog(event):
     settings_dialog.display()
 
 
 def populate_treeview(tree, parent, path):
-    text_formats = ('.md', '.txt', '.py', '.json','html','css','js')
+    text_formats = ('.md', '.txt', '.py', '.json', 'html', 'css', 'js')
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
         if os.path.isdir(item_path):
             node = tree.insert(parent, 'end', text=item, open=False)
             populate_treeview(tree, node, item_path)
         elif item_path.endswith(text_formats):
-            tree.insert(parent, 'end', text=item)
+            value = item_path.replace(root_dir,'').replace('\\','/')
+            shortcut = helper.get_key_by_value('shortcuts.json',value)
+            tree.insert(parent, 'end', text=item,values=(f"{shortcut}"))
 
 def filter_tree(tree, path, search_text=""):
     """
@@ -243,8 +256,10 @@ def filter_tree(tree, path, search_text=""):
                         node = tree.insert(parent, 'end', text=item, open=False)
                         populate_treeview(node, item_path)
             elif item_path.endswith(text_formats):
-                if search_text.lower() in item.lower():
-                    tree.insert(parent, 'end', text=item)
+                if search_text.lower() in item.lower():                    
+                    value = item_path.replace(root_dir,'').replace('\\','/')
+                    shortcut = helper.get_key_by_value('shortcuts.json',value)
+                    tree.insert(parent, 'end', text=item,values=(f"{shortcut}"))
 
     tree.delete(*tree.get_children())  # Clear the treeview
     populate_treeview('', path)
@@ -308,8 +323,9 @@ def delete_item(tree, path):
         messagebox.showerror("Error", "No item selected")
 
 def show_file_content(tree, path, text_widget):
-    global selected_path
+    global selected_path, selected_node_title, selected_shortcut
     text_widget.delete(1.0, tk.END)
+    status_label.config(text='')
 
     selected_item = tree.selection()
     if selected_item:
@@ -320,21 +336,34 @@ def show_file_content(tree, path, text_widget):
                 content = file.read()
                 text_widget.delete(1.0, tk.END)
                 text_widget.insert(tk.END, content)
+                selected_node_title = tree.item(selected_item, 'text')
+                values = tree.item(selected_item, 'values')
+                if values:
+                    selected_shortcut = values[0]
                 helper.highlight_markdown(editor)
                 update_status_label('')
+                print(selected_shortcut)
 
 
 def rename_item(tree, path):
     selected_item = tree.selection()
     if selected_item:
         old_name = tree.item(selected_item, 'text')
-        old_path = os.path.join(path, old_name)
+        file_path=generate_path(tree, selected_item[0])
+        old_path = os.path.join(path, file_path)
         new_name = simpledialog.askstring("Rename", "Enter new name:\t\t\t\t\t", initialvalue=old_name)
         if new_name:
-            new_path = os.path.join(path, new_name)
-            os.rename(old_path, new_path)
-            tree.item(selected_item, text=new_name)
+            new_path = old_path.replace(old_name, new_name)
 
+            os.rename(old_path, new_path)
+            #replace root_dir to get the rest of the path to save into json
+            tree.item(selected_item, text=new_name)
+            helper.update_json_value('shortcuts.json',selected_shortcut,new_path.replace(root_dir,''))    
+            
+            if os.path.isdir(new_path):
+                old_folder_path = old_path.replace(root_dir,'') + '/'
+                new_folder_path = new_path.replace(root_dir,'') + '/'
+                helper.update_file_content('shortcuts.json',old_folder_path, new_folder_path)
 
 def refresh_tree(tree, parent, path):
     clear_treeview(tree)
@@ -442,8 +471,16 @@ def create_app():
 
     # List on the left
 
-    treeview = ttk.Treeview(left_frame,show='tree')
+    treeview = ttk.Treeview(left_frame,show='tree headings', columns=("Shortcut"))
     treeview.pack(side="left", fill="y")
+
+    # Define columns
+    treeview.heading("#0", text="Title", anchor='w')  # Default column for tree structure
+    treeview.heading("Shortcut", text="Shortcut", anchor='w')
+
+    # Set column widths
+    treeview.column("#0", width=250)  # Set width of first column
+    treeview.column("Shortcut", width=80)  # Set width of second column
 
     populate_treeview(treeview, '', root_dir)
     
@@ -496,7 +533,7 @@ def create_app():
     popup_menu_treeview.add_command(
         label="Create New Folder", command=lambda event=None: create_new_folder(treeview, root_dir))
     popup_menu_treeview.add_command(
-        label="Change Shortcut", command=lambda event=None: change_note_shortcut(event))
+        label="Update Shortcut", command=lambda event=None: update_shortcut(event))
     popup_menu_treeview.add_command(
         label="Delete Item", command=lambda event=None: delete_item(treeview, root_dir), accelerator="Ctrl+D")
     popup_menu_treeview.add_command(
@@ -561,6 +598,11 @@ def create_app():
     helper.center_window(root, 1360, 768)
 
     #hide_window()
+
+    path= 'G:\\My Drive\\HogoNext\\textspeedy/data/Command'
+
+    if os.path.isdir(path):
+        print('yes')
 
     root.mainloop()
 
