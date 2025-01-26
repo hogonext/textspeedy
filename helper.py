@@ -607,7 +607,7 @@ def get_file_content(file_path):
       The content of the file as a string, or None if an error occurs.
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
             content = file.read()
         return content
     except FileNotFoundError:
@@ -770,7 +770,10 @@ def get_content_by_shortcut(shortcut):
     root_dir = os.getcwd() + '/data/'
     shortcuts_path = root_dir + 'shortcuts.json'
 
-    value = get_json_value(shortcuts_path, shortcut)
-    file_path = root_dir + value
+    try:
+        value = get_json_value(shortcuts_path, shortcut)
+        file_path = root_dir + value
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     return get_file_content(file_path)

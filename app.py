@@ -23,7 +23,6 @@ def on_press(key):
                 keys.clear()
             elif key.char.isalnum() or key.char == '.':
                 keys.append(key.char)
-
         except AttributeError:
             # Handle the case where `key` doesn't have a `char` attribute
             print("Error: Key does not have a 'char' attribute.")
@@ -40,12 +39,10 @@ def on_press(key):
                 is_runcommand = True
                 shortcut = shortcut[1:]  # remove first char
 
-            data = helper.db.search_by_shortcut(shortcut)
+            content = helper.get_content_by_shortcut(shortcut)
 
-            if (data != None and shortcut != ''):
-                if shortcut.lower() == data[6].lower():  # paste snippet
-                    content = data[3]
-
+            if (content != None):
+                    
                     if is_runcommand == True:  # run command
                         old_shortcut = '.' + shortcut
                         delText(old_shortcut)

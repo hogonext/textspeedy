@@ -92,12 +92,14 @@ def update_shortcut(event):
         title="Update shortcut", prompt="Enter new shortcut:\t\t\t", initialvalue=selected_shortcut
     )
 
-    if selected_shortcut != None and selected_shortcut != "":
-        helper.update_json_key(
-            shortcuts_path, selected_shortcut, new_shortcut)
+    if new_shortcut != None and new_shortcut != "":
+        #helper.update_json_key(shortcuts_path, selected_shortcut, new_shortcut)
+        print(new_shortcut)
         helper.add_or_update_key(
             shortcuts_path, new_shortcut, selected_path.replace(root_dir, ''))
         selected_shortcut = new_shortcut
+
+        clear_treeview(treeview)
         populate_treeview(treeview,'',root_dir)
 
 
@@ -327,7 +329,10 @@ def delete_item(tree, path):
 
 def show_file_content(tree, path, text_widget):
     global selected_path, selected_node_title, selected_shortcut
+    #clear before select new one
     text_widget.delete(1.0, tk.END)
+    selected_node_title=''
+    selected_shortcut = ''
     status_label.config(text='')
 
     selected_item = tree.selection()
@@ -335,7 +340,7 @@ def show_file_content(tree, path, text_widget):
         file_path=generate_path(tree, selected_item[0])
         selected_path = os.path.join(path, file_path)
         if os.path.isfile(selected_path):
-            with open(selected_path, 'r', encoding='utf-8') as file:
+            with open(selected_path, 'r', encoding='utf-8', errors='ignore') as file:
                 content = file.read()
                 text_widget.delete(1.0, tk.END)
                 text_widget.insert(tk.END, content)
@@ -345,8 +350,6 @@ def show_file_content(tree, path, text_widget):
                     selected_shortcut = values[0]
                 helper.highlight_markdown(editor)
                 update_status_label('')
-                print(selected_shortcut)
-
 
 def rename_item(tree, path):
     selected_item = tree.selection()
