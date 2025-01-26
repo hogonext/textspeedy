@@ -30,9 +30,10 @@ executable_apps = {}
 
 db = Database()
 
+settings_path = 'data/settings.json'
 
 def get_theme():
-    theme = db.get_settings_by_key('Theme')[0]
+    theme = get_json_value(settings_path,'Theme')
     if theme == 'dark':
         return "darkly"
     else:  # light

@@ -4,20 +4,18 @@ import helper
 
 import ttkbootstrap as ttk
 
-settings_path = 'data/settings.json'
-
 def save_credentials():
 
     theme = theme_combobox.get()
-    helper.add_or_update_key(settings_path,'Theme',theme)
+    helper.add_or_update_key(helper.settings_path,'Theme',theme)
 
     wp_url = wp_url_entry.get()
     wp_username = wp_username_entry.get()
     wp_password = wp_password_entry.get()
 
-    helper.add_or_update_key(settings_path,'WP_URL',wp_url)
-    helper.add_or_update_key(settings_path,'WP_Username',wp_username)
-    helper.add_or_update_key(settings_path,'WP_Password',wp_password)
+    helper.add_or_update_key(helper.settings_path,'WP_URL',wp_url)
+    helper.add_or_update_key(helper.settings_path,'WP_Username',wp_username)
+    helper.add_or_update_key(helper.settings_path,'WP_Password',wp_password)
 
     messagebox.showinfo("Settings", "Settings saved successfully!")
 
@@ -26,9 +24,9 @@ def save_credentials():
 
 def load_credentials():
 
-    wp_url = helper.get_json_value(settings_path,'WP_URL')
-    wp_username = helper.get_json_value(settings_path,'WP_Username')
-    wp_password = helper.get_json_value(settings_path,'WP_Password')
+    wp_url = helper.get_json_value(helper.settings_path,'WP_URL')
+    wp_username = helper.get_json_value(helper.settings_path,'WP_Username')
+    wp_password = helper.get_json_value(helper.settings_path,'WP_Password')
 
     wp_url_entry.delete(0, END)
     wp_url_entry.insert(0, wp_url)
@@ -52,7 +50,7 @@ def display():
     theme_label = tk.Label(root, text="Theme:")
     # Create a combobox with 'dark' and 'light' options
     theme_combobox = ttk.Combobox(root, values=["dark", "light"],justify="left")
-    theme_combobox.set(helper.get_json_value(settings_path,'Theme'))
+    theme_combobox.set(helper.get_json_value(helper.settings_path,'Theme'))
 
     wp_url_label = tk.Label(root, text="WP_URL:")
     wp_url_entry = tk.Entry(root, width=50)

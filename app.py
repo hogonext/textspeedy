@@ -63,9 +63,9 @@ def on_press(key):
         quick_type = True
     elif quick_type and key == keyboard.Key.f1:
         try:
-            subprocess.run(["python", "quick_type_box.py"])
+            subprocess.run(["python", "quick_command_box.py"])
         except subprocess.CalledProcessError as e:
-            print(f"Error executing quick_type_box.py: {e}")
+            print(f"Error executing quick_command_box.py: {e}")
         quick_type = False 
 
 def copy_paste(content):

@@ -3,7 +3,7 @@ from ttkbootstrap.constants import *
 
 import helper
 
-quick_type = False
+quick_command = False
 
 
 def on_esc_key(event):
