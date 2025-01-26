@@ -613,30 +613,31 @@ def write_to_file(file_path, content, mode="w"):
     except OSError as error:
         print(f"Error writing to file: {error}")
 
+
 def update_file_content(filename, old_string, new_string):
-  """
-  Updates the content of a file by replacing all occurrences of an old string with a new string.
+    """
+    Updates the content of a file by replacing all occurrences of an old string with a new string.
 
-  Args:
-    filename: The path to the file to update.
-    old_string: The string to be replaced.
-    new_string: The string to replace the old string with.
-  """
-  try:
-    with open(filename, 'r') as f:
-      file_content = f.read()
+    Args:
+      filename: The path to the file to update.
+      old_string: The string to be replaced.
+      new_string: The string to replace the old string with.
+    """
+    try:
+        with open(filename, 'r') as f:
+            file_content = f.read()
 
-    new_content = file_content.replace(old_string, new_string)
+        new_content = file_content.replace(old_string, new_string)
 
-    with open(filename, 'w') as f:
-      f.write(new_content)
+        with open(filename, 'w') as f:
+            f.write(new_content)
 
-    print(f"File '{filename}' updated successfully.")
+        print(f"File '{filename}' updated successfully.")
 
-  except FileNotFoundError:
-    print(f"Error: File '{filename}' not found.")
-  except Exception as e:
-    print(f"An error occurred: {e}")
+    except FileNotFoundError:
+        print(f"Error: File '{filename}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def add_or_update_key(filename, key, value):
@@ -697,3 +698,47 @@ def get_key_by_value(filename, target_value):
             found_key = key
 
     return found_key
+
+
+def search_json(filename, search_text):
+    """
+    Searches a JSON object for any matching text in keys or values and returns a list of matching key-value pairs.
+
+    Args:
+      json_data: The JSON data to search (dictionary).
+      search_text: The text to search for in keys and values.
+
+    Returns:
+      A list of matching key-value pairs as tuples.
+    """
+
+    with open(filename, 'r') as f:
+        json_data = json.load(f)
+
+    search_text = search_text.lower()
+    results = []
+
+    for key, value in json_data.items():
+        if search_text in key.lower() or search_text in str(value).lower():
+            results.append((key, value))
+
+    return results
+
+
+def json_to_array(json_data):
+    """
+    Converts a JSON object (list or dictionary) to an array of dictionaries.
+
+    Args:
+      json_data: The JSON data to convert.
+
+    Returns:
+      An array of dictionaries.
+    """
+
+    if isinstance(json_data, list):
+        return json_data  # Already an array
+    elif isinstance(json_data, dict):
+        return [json_data]  # Convert single object to array
+    else:
+        return []  # Not a valid JSON object

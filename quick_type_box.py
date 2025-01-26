@@ -5,19 +5,23 @@ import helper
 
 quick_type = False
 
+
 def on_esc_key(event):
     if event.keysym == 'Escape':
         root.destroy()
+
 
 def on_focus_out(event):
     if event.widget == searchbox:
         root.destroy()
 
+
 def show_window():
     root.deiconify()
 
+
 def run_command(event):
-    global quick_type 
+    global quick_type
 
     shortcut = searchbox.get()
 
@@ -39,10 +43,13 @@ def show_popup(event=None):
 
     word = searchbox.get()
     if word:
-        data = helper.db.search_note_item_by_title_for_treeview(word)
-        converted_array = [f"{item[2]} {item[1]}" for item in data]
-        
-        suggestions = [brand for brand in converted_array if word.lower() in brand.lower()]
+
+        data = helper.json_to_array(helper.search_json('shortcuts.json', word))
+
+        converted_array = [f"{item[0]} {item[1]}" for item in data]
+
+        suggestions = [
+            brand for brand in converted_array if word.lower() in brand.lower()]
 
     if not suggestions:
         return
@@ -53,16 +60,19 @@ def show_popup(event=None):
     popup.geometry("400x200")
 
     # Tạo Treeview
-    treeview = ttk.Treeview(popup, columns=("Shortcut", "Title"), show="headings")
+    treeview = ttk.Treeview(popup, columns=(
+        "Shortcut", "File Path"), show="headings")
     treeview.heading("Shortcut", text="Shortcut", anchor='w')
-    treeview.heading("Title", text="Title", anchor='w')
+    treeview.heading("File Path", text="File Path", anchor='w')
 
     treeview.column("Shortcut", width=60, anchor='w')
-    treeview.column("Title", width=250, anchor='w')
+    treeview.column("File Path", width=250, anchor='w')
 
     # Tạo Scrollbar
     scrollbar = ttk.Scrollbar(popup, orient="vertical", command=treeview.yview)
     treeview.configure(yscrollcommand=scrollbar.set)
+
+    treeview.bind("<KeyPress>", on_esc_key)  # Bind to escape key
 
     # Đặt Treeview và Scrollbar vào Frame
     treeview.pack(side=ttk.LEFT, expand=True, fill=ttk.BOTH)
@@ -73,9 +83,8 @@ def show_popup(event=None):
         parts = suggestion.split(' ', 1)  # Tách chuỗi thành hai phần
         treeview.insert("", "end", values=(parts[0], parts[1]))
 
-    
-
     treeview.pack(padx=5, pady=5)
+
 
 popup = None  # Initialize popup variable
 
@@ -106,7 +115,7 @@ icon_label.pack(side="right")  # Place the icon on the right side
 searchbox.focus_set()
 
 # Bind the focus out event to the entry widget
-searchbox.bind("<FocusOut>", on_focus_out)
+#searchbox.bind("<FocusOut>", on_focus_out)
 searchbox.bind("<KeyRelease>", show_popup)
 searchbox.bind('<KeyRelease-Return>', run_command)
 
