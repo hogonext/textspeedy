@@ -93,14 +93,14 @@ def update_shortcut(event):
     )
 
     if new_shortcut != None and new_shortcut != "":
-        #helper.update_json_key(shortcuts_path, selected_shortcut, new_shortcut)
+        # helper.update_json_key(shortcuts_path, selected_shortcut, new_shortcut)
         print(new_shortcut)
         helper.add_or_update_key(
             shortcuts_path, new_shortcut, selected_path.replace(root_dir, ''))
         selected_shortcut = new_shortcut
 
         clear_treeview(treeview)
-        populate_treeview(treeview,'',root_dir)
+        populate_treeview(treeview, '', root_dir)
 
 
 def on_right_click_treeview(event):
@@ -220,15 +220,17 @@ def display_settings_dialog(event):
 def populate_treeview(tree, parent, path):
     global shortcuts_path
     text_formats = ('.md', '.txt', '.py', '.json', 'html', 'css', 'js')
+
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
         if os.path.isdir(item_path):
             node = tree.insert(parent, 'end', text=item, open=False)
             populate_treeview(tree, node, item_path)
         elif item_path.endswith(text_formats):
-            value = item_path.replace(root_dir,'').replace('\\','/')
-            shortcut = helper.get_key_by_value(shortcuts_path,value)
-            tree.insert(parent, 'end', text=item,values=(f"{shortcut}"))
+            value = item_path.replace(root_dir, '').replace('\\', '/')
+            shortcut = helper.get_key_by_value(shortcuts_path, value)
+            tree.insert(parent, 'end', text=item, values=(f"{shortcut}"))
+
 
 def filter_tree(tree, path, search_text=""):
     global shortcuts_path
@@ -258,26 +260,42 @@ def filter_tree(tree, path, search_text=""):
                             has_matching_children = True
                             break
                     if has_matching_children:
-                        node = tree.insert(parent, 'end', text=item, open=False)
+                        node = tree.insert(
+                            parent, 'end', text=item, open=False)
                         populate_treeview(node, item_path)
             elif item_path.endswith(text_formats):
-                if search_text.lower() in item.lower():                    
-                    value = item_path.replace(root_dir,'').replace('\\','/')
-                    shortcut = helper.get_key_by_value(shortcuts_path,value)
-                    tree.insert(parent, 'end', text=item,values=(f"{shortcut}"))
+                if search_text.lower() in item.lower():
+                    value = item_path.replace(root_dir, '').replace('\\', '/')
+                    shortcut = helper.get_key_by_value(shortcuts_path, value)
+                    tree.insert(parent, 'end', text=item,
+                                values=(f"{shortcut}"))
 
     tree.delete(*tree.get_children())  # Clear the treeview
     populate_treeview('', path)
 
+
+def create_new_folder_at_root_level(tree, path):
+    selected_path = os.path.join(path, root_dir)
+    if os.path.isdir(selected_path):
+        new_folder_name = simpledialog.askstring(
+            "New Folder", "Enter folder name:\t\t\t\t\t", initialvalue='New folder')
+        if new_folder_name:
+            new_folder_path = os.path.join(selected_path, new_folder_name)
+            os.makedirs(new_folder_path, exist_ok=True)
+            tree.insert('', 'end', text=new_folder_name)
+            tree.item('', open=True)
+
+
 def create_new_folder(tree, path):
     selected_item = tree.selection()
     if selected_item:
-        parent_folder = tree.item(selected_item, 'text')
-        parent_path = os.path.join(path, parent_folder)
-        if os.path.isdir(parent_path):
-            new_folder_name = simpledialog.askstring("New Folder", "Enter folder name:\t\t\t\t\t",initialvalue='New folder')
-            if new_folder_name:                
-                new_folder_path = os.path.join(parent_path, new_folder_name)
+        file_path = generate_path(tree, selected_item[0])
+        selected_path = os.path.join(path, file_path)
+        if os.path.isdir(selected_path):
+            new_folder_name = simpledialog.askstring(
+                "New Folder", "Enter folder name:\t\t\t\t\t", initialvalue='New folder')
+            if new_folder_name:
+                new_folder_path = os.path.join(selected_path, new_folder_name)
                 os.makedirs(new_folder_path, exist_ok=True)
                 tree.insert(selected_item, 'end', text=new_folder_name)
                 tree.item(selected_item, open=True)
@@ -286,18 +304,45 @@ def create_new_folder(tree, path):
     else:
         messagebox.showerror("Error", "No folder selected")
 
+
+def create_new_file_at_root_level(tree, path):
+
+    selected_path = os.path.join(path, root_dir)
+    if os.path.isdir(selected_path):
+        new_file_name = simpledialog.askstring("New File", "Enter file name:\t\t\t\t\t")
+        if new_file_name:
+            root, ext = os.path.splitext(new_file_name)
+            if not ext:
+                new_file_name = new_file_name + '.md'
+            new_file_path = os.path.join(selected_path, new_file_name)
+            with open(new_file_path, 'w') as file:
+                file.write("")  # Create an empty file
+            tree.insert('', 'end', text=new_file_name)
+            tree.item('', open=True)
+
+
 def create_new_file(tree, path):
+
+    if tree.focus() and not tree.selection():
+        print('a')
+        root_items = tree.get_children()
+        if root_items:  # Make sure there are root items
+            tree.selection_set(root_items[0])
+            print('a')
     selected_item = tree.selection()
     if selected_item:
-        parent_folder = tree.item(selected_item, 'text')
-        parent_path = os.path.join(path, parent_folder)
-        if os.path.isdir(parent_path):
-            new_file_name = simpledialog.askstring("New File", "Enter file name:\t\t\t\t\t")
+        # parent_folder = tree.item(selected_item, 'text')
+        # parent_path = os.path.join(path, parent_folder)
+        file_path = generate_path(tree, selected_item[0])
+        selected_path = os.path.join(path, file_path)
+        if os.path.isdir(selected_path):
+            new_file_name = simpledialog.askstring(
+                "New File", "Enter file name:\t\t\t\t\t")
             if new_file_name:
                 root, ext = os.path.splitext(new_file_name)
                 if not ext:
                     new_file_name = new_file_name + '.md'
-                new_file_path = os.path.join(parent_path, new_file_name)
+                new_file_path = os.path.join(selected_path, new_file_name)
                 with open(new_file_path, 'w') as file:
                     file.write("")  # Create an empty file
                 tree.insert(selected_item, 'end', text=new_file_name)
@@ -307,13 +352,14 @@ def create_new_file(tree, path):
     else:
         messagebox.showerror("Error", "No folder selected")
 
+
 def delete_item(tree, path):
 
     answer = messagebox.askyesno(title='Confirmation',
                                  message='Are you sure that you want to delete this note?')
 
-    if not answer: 
-        return        
+    if not answer:
+        return
 
     selected_item = tree.selection()
     if selected_item:
@@ -327,17 +373,18 @@ def delete_item(tree, path):
     else:
         messagebox.showerror("Error", "No item selected")
 
+
 def show_file_content(tree, path, text_widget):
     global selected_path, selected_node_title, selected_shortcut
-    #clear before select new one
+    # clear before select new one
     text_widget.delete(1.0, tk.END)
-    selected_node_title=''
+    selected_node_title = ''
     selected_shortcut = ''
     status_label.config(text='')
 
     selected_item = tree.selection()
     if selected_item:
-        file_path=generate_path(tree, selected_item[0])
+        file_path = generate_path(tree, selected_item[0])
         selected_path = os.path.join(path, file_path)
         if os.path.isfile(selected_path):
             with open(selected_path, 'r', encoding='utf-8', errors='ignore') as file:
@@ -351,29 +398,35 @@ def show_file_content(tree, path, text_widget):
                 helper.highlight_markdown(editor)
                 update_status_label('')
 
+
 def rename_item(tree, path):
     selected_item = tree.selection()
     if selected_item:
         old_name = tree.item(selected_item, 'text')
-        file_path=generate_path(tree, selected_item[0])
+        file_path = generate_path(tree, selected_item[0])
         old_path = os.path.join(path, file_path)
-        new_name = simpledialog.askstring("Rename", "Enter new name:\t\t\t\t\t", initialvalue=old_name)
+        new_name = simpledialog.askstring(
+            "Rename", "Enter new name:\t\t\t\t\t", initialvalue=old_name)
         if new_name:
             new_path = old_path.replace(old_name, new_name)
 
             os.rename(old_path, new_path)
-            #replace root_dir to get the rest of the path to save into json
+            # replace root_dir to get the rest of the path to save into json
             tree.item(selected_item, text=new_name)
-            helper.update_json_value(shortcuts_path,selected_shortcut,new_path.replace(root_dir,''))    
-            
+            helper.update_json_value(
+                shortcuts_path, selected_shortcut, new_path.replace(root_dir, ''))
+
             if os.path.isdir(new_path):
-                old_folder_path = old_path.replace(root_dir,'') + '/'
-                new_folder_path = new_path.replace(root_dir,'') + '/'
-                helper.update_file_content(shortcuts_path,old_folder_path, new_folder_path)
+                old_folder_path = old_path.replace(root_dir, '') + '/'
+                new_folder_path = new_path.replace(root_dir, '') + '/'
+                helper.update_file_content(
+                    shortcuts_path, old_folder_path, new_folder_path)
+
 
 def refresh_tree(tree, parent, path):
     clear_treeview(tree)
-    populate_treeview(treeview,parent, path)
+    populate_treeview(treeview, parent, path)
+
 
 def generate_path(tree, selected_item):
     """
@@ -390,6 +443,7 @@ def generate_path(tree, selected_item):
 
     return '/'.join(path[::-1])  # Reverse the list to get root first
 
+
 def on_search_change(event):
     global root_dir
 
@@ -398,14 +452,15 @@ def on_search_change(event):
 
     filter_tree(treeview, root_dir, search_text)
 
+
 def create_app():
     global root, treeview, editor, status_label, searchbox
 
-    new_version = helper.get_website_content("https://hogonext.com/textspeedy-vesion.html")
+    new_version = helper.get_website_content(
+        "https://hogonext.com/textspeedy-vesion.html")
 
     if (new_version != current_version):
         subprocess.run(["python", "check_for_updates.py"])
-
 
     root = ttk.Window(themename=helper.get_theme())
 
@@ -477,11 +532,13 @@ def create_app():
 
     # List on the left
 
-    treeview = ttk.Treeview(left_frame,show='tree headings', columns=("Shortcut"))
+    treeview = ttk.Treeview(
+        left_frame, show='tree headings', columns=("Shortcut"))
     treeview.pack(side="left", fill="y")
 
     # Define columns
-    treeview.heading("#0", text="Title", anchor='w')  # Default column for tree structure
+    # Default column for tree structure
+    treeview.heading("#0", text="Title", anchor='w')
     treeview.heading("Shortcut", text="Shortcut", anchor='w')
 
     # Set column widths
@@ -489,7 +546,7 @@ def create_app():
     treeview.column("Shortcut", width=80)  # Set width of second column
 
     populate_treeview(treeview, '', root_dir)
-    
+
     # Create and pack the scrollbars for the Treeview and Text widget
     treeview_scrollbar = tk.Scrollbar(
         left_frame, orient="vertical", command=treeview.yview)
@@ -497,7 +554,8 @@ def create_app():
     treeview_scrollbar.pack(side="left", fill="y")
 
     # Bind the Treeview selection event to show file content
-    treeview.bind('<<TreeviewSelect>>', lambda event: show_file_content(treeview, root_dir, editor))
+    treeview.bind('<<TreeviewSelect>>', lambda event: show_file_content(
+        treeview, root_dir, editor))
 
     # Text widget on the right
     editor = tk.Text(right_frame, wrap="word")
@@ -518,7 +576,7 @@ def create_app():
 
     # UI end block code
 
-    #load_nodes(treeview)
+    # load_nodes(treeview)
     select_first_item(treeview)
 
     root.bind('<Control-n>', create_new_file)
@@ -535,6 +593,10 @@ def create_app():
     global popup_menu_treeview
     popup_menu_treeview = tk.Menu(root, tearoff=0)
     popup_menu_treeview.add_command(
+        label="Create New File at Root level", command=lambda event=None: create_new_file_at_root_level(treeview, root_dir))
+    popup_menu_treeview.add_command(
+        label="Create New Folder at Root level", command=lambda event=None: create_new_folder_at_root_level(treeview, root_dir))
+    popup_menu_treeview.add_command(
         label="Create New File", command=lambda event=None: create_new_file(treeview, root_dir), accelerator="Ctrl+N")
     popup_menu_treeview.add_command(
         label="Create New Folder", command=lambda event=None: create_new_folder(treeview, root_dir))
@@ -545,9 +607,7 @@ def create_app():
     popup_menu_treeview.add_command(
         label="Rename Item", command=lambda event=None: rename_item(treeview, root_dir))
     popup_menu_treeview.add_command(
-        label="Refresh", command=lambda event=None: refresh_tree(treeview,'', root_dir), accelerator="Ctrl+F5")
-   
-
+        label="Refresh", command=lambda event=None: refresh_tree(treeview, '', root_dir), accelerator="Ctrl+F5")
 
     # Bind the right click event to the Treeview
     treeview.bind('<Button-3>', on_right_click_treeview)
@@ -603,9 +663,9 @@ def create_app():
 
     helper.center_window(root, 1360, 768)
 
-    #hide_window()
+    # hide_window()
 
-    path= 'G:\\My Drive\\HogoNext\\textspeedy/data/Command'
+    path = 'G:\\My Drive\\HogoNext\\textspeedy/data/Command'
 
     if os.path.isdir(path):
         print('yes')
