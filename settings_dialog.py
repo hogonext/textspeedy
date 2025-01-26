@@ -4,30 +4,31 @@ import helper
 
 import ttkbootstrap as ttk
 
+settings_path = 'data/settings.json'
 
 def save_credentials():
 
     theme = theme_combobox.get()
-    helper.db.update_settings_by_key('Theme',theme)
+    helper.add_or_update_key(settings_path,'Theme',theme)
 
     wp_url = wp_url_entry.get()
     wp_username = wp_username_entry.get()
     wp_password = wp_password_entry.get()
 
-    helper.db.update_settings_by_key('WP_URL',wp_url)
-    helper.db.update_settings_by_key('WP_Username',wp_username)
-    helper.db.update_settings_by_key('WP_Password',wp_password)
+    helper.add_or_update_key(settings_path,'WP_URL',wp_url)
+    helper.add_or_update_key(settings_path,'WP_Username',wp_username)
+    helper.add_or_update_key(settings_path,'WP_Password',wp_password)
 
-    messagebox.showinfo("Saved", "Settings saved successfully!")
+    messagebox.showinfo("Settings", "Settings saved successfully!")
 
-    root.destroy();
+    root.destroy()
 
 
 def load_credentials():
 
-    wp_url = helper.db.get_settings_by_key('WP_URL')[0]
-    wp_username = helper.db.get_settings_by_key('WP_Username')[0]
-    wp_password = helper.db.get_settings_by_key('WP_Password')[0]
+    wp_url = helper.get_json_value(settings_path,'WP_URL')
+    wp_username = helper.get_json_value(settings_path,'WP_Username')
+    wp_password = helper.get_json_value(settings_path,'WP_Password')
 
     wp_url_entry.delete(0, END)
     wp_url_entry.insert(0, wp_url)
