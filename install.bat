@@ -2,7 +2,6 @@ pip install pynput
 pip install pyperclip
 pip install pyautoui
 pip install pywebview
-pip install sqlite3
 pip install ttkbootstrap
 pip install markdown
 pip install markdownify

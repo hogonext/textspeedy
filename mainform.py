@@ -6,7 +6,7 @@ import webbrowser
 from pystray import MenuItem as item
 import pystray
 import subprocess
-from PIL import Image, ImageTk
+from PIL import Image
 
 from tkinter import Menu, messagebox, simpledialog, END, VERTICAL
 

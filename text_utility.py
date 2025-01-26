@@ -8,9 +8,6 @@ import pyperclip
 import markdown
 from markdownify import markdownify as md
 
-# Define functions for each option
-
-
 def add_prefix_and_postfix_per_line():
     print("Add Prefix and Postfix Per Line selected")
 
