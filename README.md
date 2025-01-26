@@ -21,7 +21,6 @@ Website: https://hogonext.com/textspeedy
 
 ## Quick Start
 - Install Python version 3.12 and above : [Download Python](https://www.python.org/downloads/)
-- Install SqlLite3 :  [Download SqlLite]([https://www.python.org/downloads/](https://www.sqlite.org/download.html))
 - Download Source Code: [Github](https://github.com/hogonext/textspeedy)
 - Run **install.bat** file
 - Windows: double-click **run.bat** file
