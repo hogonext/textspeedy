@@ -437,7 +437,7 @@ def read_json_file(filename="settings.json"):
       A Python dictionary containing the data from the JSON file.
     """
     try:
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data
     except FileNotFoundError:
@@ -500,7 +500,7 @@ def update_json_value(filename, key, new_value):
     """
     try:
         # 1. Read the existing settings
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             settings = json.load(f)
 
         # 2. Update the specific key
@@ -528,7 +528,7 @@ def get_json_value(filename, key):
       The value associated with the key if found, otherwise None.
     """
     try:
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             file = json.load(f)
 
         if key in file:
@@ -551,7 +551,7 @@ def search_executables(search_key):
     json_file = "executables.json"
 
     try:
-        with open(json_file, 'r') as f:
+        with open(json_file, 'r', encoding='utf-8') as f:
             filtered_executables = []
             for line in f:
                 try:
@@ -596,6 +596,28 @@ def dict_to_array(my_dict):
     return [[key, value] for key, value in my_dict.items()]
 
 
+def get_file_content(file_path):
+    """
+    Reads and returns the content of a file.
+
+    Args:
+      file_path: The path to the file.
+
+    Returns:
+      The content of the file as a string, or None if an error occurs.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        return content
+    except FileNotFoundError:
+        print(f"Error: File not found: {file_path}")
+        return None
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        return None
+
+
 def write_to_file(file_path, content, mode="w"):
     """
     Writes content to a file.
@@ -624,7 +646,7 @@ def update_file_content(filename, old_string, new_string):
       new_string: The string to replace the old string with.
     """
     try:
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             file_content = f.read()
 
         new_content = file_content.replace(old_string, new_string)
@@ -642,7 +664,7 @@ def update_file_content(filename, old_string, new_string):
 
 def add_or_update_key(filename, key, value):
 
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding='utf-8') as f:
         json_data = json.load(f)
 
     if key in json_data:
@@ -671,7 +693,7 @@ def update_json_key(filename, old_key, new_key):
       The updated JSON data.
     """
 
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding='utf-8') as f:
         json_data = json.load(f)
 
     if old_key in json_data:
@@ -688,7 +710,7 @@ def update_json_key(filename, old_key, new_key):
 
 def get_key_by_value(filename, target_value):
 
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding='utf-8') as f:
         json_data = json.load(f)
 
     found_key = ''
@@ -712,7 +734,7 @@ def search_json(filename, search_text):
       A list of matching key-value pairs as tuples.
     """
 
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding='utf-8') as f:
         json_data = json.load(f)
 
     search_text = search_text.lower()
@@ -742,3 +764,13 @@ def json_to_array(json_data):
         return [json_data]  # Convert single object to array
     else:
         return []  # Not a valid JSON object
+
+
+def get_content_by_shortcut(shortcut):
+    root_dir = os.getcwd() + '/data/'
+    shortcuts_path = root_dir + 'shortcuts.json'
+
+    value = get_json_value(shortcuts_path, shortcut)
+    file_path = root_dir + value
+
+    return get_file_content(file_path)

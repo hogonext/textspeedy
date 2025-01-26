@@ -335,7 +335,7 @@ def show_file_content(tree, path, text_widget):
         file_path=generate_path(tree, selected_item[0])
         selected_path = os.path.join(path, file_path)
         if os.path.isfile(selected_path):
-            with open(selected_path, 'r') as file:
+            with open(selected_path, 'r', encoding='utf-8') as file:
                 content = file.read()
                 text_widget.delete(1.0, tk.END)
                 text_widget.insert(tk.END, content)

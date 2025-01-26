@@ -21,18 +21,12 @@ def show_window():
 
 
 def run_command(event):
-    global quick_type
-
     shortcut = searchbox.get()
 
-    print(shortcut)
-    data = helper.db.search_by_shortcut(shortcut)
+    content = helper.get_content_by_shortcut(shortcut)
 
-    if shortcut.lower() == data[6].lower():  # paste snippet
-        content = data[3]
-
-        if (data != None):
-            output = helper.execute(content)
+    if (content != None):
+        output = helper.execute(content)
 
 
 def show_popup(event=None):
