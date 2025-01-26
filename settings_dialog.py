@@ -47,13 +47,12 @@ def display():
     root.title("Settings")
     root.resizable(False, False)
 
-
     # Create entry widgets
 
     theme_label = tk.Label(root, text="Theme:")
     # Create a combobox with 'dark' and 'light' options
     theme_combobox = ttk.Combobox(root, values=["dark", "light"],justify="left")
-    theme_combobox.set(helper.db.get_settings_by_key('Theme')[0])
+    theme_combobox.set(helper.get_json_value(settings_path,'Theme'))
 
     wp_url_label = tk.Label(root, text="WP_URL:")
     wp_url_entry = tk.Entry(root, width=50)
