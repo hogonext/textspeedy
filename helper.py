@@ -24,11 +24,7 @@ from html.parser import HTMLParser
 from datetime import datetime
 from tkinter.font import Font
 
-from database import Database
-
 executable_apps = {}
-
-db = Database()
 
 settings_path = 'data/settings.json'
 
