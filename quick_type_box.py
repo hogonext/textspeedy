@@ -44,7 +44,7 @@ def show_popup(event=None):
     word = searchbox.get()
     if word:
 
-        data = helper.json_to_array(helper.search_json('shortcuts.json', word))
+        data = helper.json_to_array(helper.search_json('data/shortcuts.json', word))
 
         converted_array = [f"{item[0]} {item[1]}" for item in data]
 

@@ -22,6 +22,7 @@ import markdown
 
 current_version = "1.2"
 root_dir = os.getcwd() + '/data/'
+shortcuts_path = 'data/shortcuts.json'
 
 selected_node_title = ''
 selected_shortcut = ''
@@ -85,7 +86,7 @@ def on_text_change(event):
 
 
 def update_shortcut(event):
-    global selected_path, selected_shortcut, selected_node_title
+    global selected_path, selected_shortcut, selected_node_title, shortcuts_path
 
     new_shortcut = simpledialog.askstring(
         title="Update shortcut", prompt="Enter new shortcut:\t\t\t", initialvalue=selected_shortcut
@@ -93,9 +94,9 @@ def update_shortcut(event):
 
     if selected_shortcut != None and selected_shortcut != "":
         helper.update_json_key(
-            'shortcuts.json', selected_shortcut, new_shortcut)
+            shortcuts_path, selected_shortcut, new_shortcut)
         helper.add_or_update_key(
-            'shortcuts.json', new_shortcut, selected_path.replace(root_dir, ''))
+            shortcuts_path, new_shortcut, selected_path.replace(root_dir, ''))
         selected_shortcut = new_shortcut
         populate_treeview(treeview,'',root_dir)
 
@@ -215,6 +216,7 @@ def display_settings_dialog(event):
 
 
 def populate_treeview(tree, parent, path):
+    global shortcuts_path
     text_formats = ('.md', '.txt', '.py', '.json', 'html', 'css', 'js')
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
@@ -223,10 +225,11 @@ def populate_treeview(tree, parent, path):
             populate_treeview(tree, node, item_path)
         elif item_path.endswith(text_formats):
             value = item_path.replace(root_dir,'').replace('\\','/')
-            shortcut = helper.get_key_by_value('shortcuts.json',value)
+            shortcut = helper.get_key_by_value(shortcuts_path,value)
             tree.insert(parent, 'end', text=item,values=(f"{shortcut}"))
 
 def filter_tree(tree, path, search_text=""):
+    global shortcuts_path
     """
     Handles treeview population and filtering for files and directories.
 
@@ -258,7 +261,7 @@ def filter_tree(tree, path, search_text=""):
             elif item_path.endswith(text_formats):
                 if search_text.lower() in item.lower():                    
                     value = item_path.replace(root_dir,'').replace('\\','/')
-                    shortcut = helper.get_key_by_value('shortcuts.json',value)
+                    shortcut = helper.get_key_by_value(shortcuts_path,value)
                     tree.insert(parent, 'end', text=item,values=(f"{shortcut}"))
 
     tree.delete(*tree.get_children())  # Clear the treeview
@@ -358,12 +361,12 @@ def rename_item(tree, path):
             os.rename(old_path, new_path)
             #replace root_dir to get the rest of the path to save into json
             tree.item(selected_item, text=new_name)
-            helper.update_json_value('shortcuts.json',selected_shortcut,new_path.replace(root_dir,''))    
+            helper.update_json_value(shortcuts_path,selected_shortcut,new_path.replace(root_dir,''))    
             
             if os.path.isdir(new_path):
                 old_folder_path = old_path.replace(root_dir,'') + '/'
                 new_folder_path = new_path.replace(root_dir,'') + '/'
-                helper.update_file_content('shortcuts.json',old_folder_path, new_folder_path)
+                helper.update_file_content(shortcuts_path,old_folder_path, new_folder_path)
 
 def refresh_tree(tree, parent, path):
     clear_treeview(tree)
