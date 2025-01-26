@@ -11,10 +11,10 @@ keys = []
 
 kb = Controller()
 
-quick_type = False
+quick_command = False
 
 def on_press(key):
-    global quick_type 
+    global quick_command 
 
     if hasattr(key, 'char'):
         try:
@@ -60,8 +60,8 @@ def on_press(key):
             keys.clear()
 
     if key == keyboard.Key.ctrl_l:
-        quick_type = True
-    elif quick_type and key == keyboard.Key.f1:
+        quick_command = True
+    elif quick_command and key == keyboard.Key.f1:
         try:
             subprocess.run(["python", "quick_command_box.py"])
         except subprocess.CalledProcessError as e:
