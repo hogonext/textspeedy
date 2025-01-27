@@ -363,12 +363,12 @@ def delete_item(tree, path):
 
     selected_item = tree.selection()
     if selected_item:
-        item_name = tree.item(selected_item, 'text')
-        item_path = os.path.join(path, item_name)
-        if os.path.isdir(item_path):
-            shutil.rmtree(item_path)
-        elif os.path.isfile(item_path):
-            os.remove(item_path)
+        file_path = generate_path(tree, selected_item[0])
+        selected_path = os.path.join(path, file_path)
+        if os.path.isdir(selected_path):
+            shutil.rmtree(selected_path)
+        elif os.path.isfile(selected_path):
+            os.remove(selected_path)
         tree.delete(selected_item)
     else:
         messagebox.showerror("Error", "No item selected")
