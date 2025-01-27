@@ -216,6 +216,46 @@ def display_text_utility(event):
 def display_settings_dialog(event):
     settings_dialog.display()
 
+
+def windows_explorer_sort(tree, parent):
+    """Sorts a treeview like Windows Explorer.
+
+    Folders appear first, followed by files, both sorted in ascending order.
+
+    Args:
+      tree: The treeview widget to sort.
+      parent: The parent node ID within the treeview.
+    """
+
+    # Get a list of all children of the parent node
+    children = tree.get_children(parent)
+
+    # Separate folders and files
+    folders = []
+    files = []
+    for child in children:
+        full_path = os.path.join(
+            tree.item(parent, 'text'), tree.item(child, 'text'))
+        if os.path.isdir(full_path):
+            folders.append(child)
+        else:
+            files.append(child)
+
+    # Sort folders and files case-insensitively
+    folders.sort(key=lambda item: tree.item(item, 'text').lower())
+    files.sort(key=lambda item: tree.item(item, 'text').lower())
+
+    # Move items within the treeview to achieve the desired order
+    for index, folder in enumerate(folders):
+        tree.move(folder, parent, index)
+    for index, file in enumerate(files):
+        tree.move(file, parent, index + len(folders))
+
+    # Recursively sort children of folders
+    for folder in folders:
+        windows_explorer_sort(tree, folder)
+
+
 def populate_treeview(tree, parent, path):
     global shortcuts_path
     text_formats = ('.md', '.txt', '.py', '.json', 'html', 'css', 'js')
@@ -223,7 +263,7 @@ def populate_treeview(tree, parent, path):
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
         if os.path.isdir(item_path):
-            node = tree.insert(parent, 'end', text=item, values=(item,), open=False, tags=('folder',))
+            node = tree.insert(parent, 'end', text=item, open=False)
 
             populate_treeview(tree, node, item_path)
         elif item_path.endswith(text_formats):
@@ -309,7 +349,8 @@ def create_new_file_at_root_level(tree, path):
 
     selected_path = os.path.join(path, root_dir)
     if os.path.isdir(selected_path):
-        new_file_name = simpledialog.askstring("New File", "Enter file name:\t\t\t\t\t")
+        new_file_name = simpledialog.askstring(
+            "New File", "Enter file name:\t\t\t\t\t")
         if new_file_name:
             root, ext = os.path.splitext(new_file_name)
             if not ext:
@@ -424,6 +465,7 @@ def rename_item(tree, path):
 def refresh_tree(tree, parent, path):
     clear_treeview(tree)
     populate_treeview(treeview, parent, path)
+    windows_explorer_sort(treeview, '')
 
 
 def generate_path(tree, selected_item):
@@ -440,6 +482,7 @@ def generate_path(tree, selected_item):
         current_item = tree.parent(current_item)
 
     return '/'.join(path[::-1])  # Reverse the list to get root first
+
 
 def on_search_change(event):
     global root_dir
@@ -537,7 +580,6 @@ def create_app():
     # Default column for tree structure
     treeview.heading("#0", text="Title", anchor='w')
     treeview.heading("Shortcut", text="Shortcut", anchor='w')
-
 
     # Set column widths
     treeview.column("#0", width=250)  # Set width of first column
@@ -662,6 +704,9 @@ def create_app():
     helper.center_window(root, 1360, 768)
 
     hide_window()
+
+    # Sort the treeview
+    windows_explorer_sort(treeview, '')
 
     root.mainloop()
 
