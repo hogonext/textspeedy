@@ -770,7 +770,6 @@ def get_content_by_shortcut(shortcut):
     try:
         value = get_json_value(shortcuts_path, shortcut)
         file_path = root_dir + value
+        return get_file_content(file_path)
     except Exception as e:
         print(f"An error occurred: {e}")
-
-    return get_file_content(file_path)
