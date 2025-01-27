@@ -216,7 +216,6 @@ def display_text_utility(event):
 def display_settings_dialog(event):
     settings_dialog.display()
 
-
 def populate_treeview(tree, parent, path):
     global shortcuts_path
     text_formats = ('.md', '.txt', '.py', '.json', 'html', 'css', 'js')
@@ -224,7 +223,8 @@ def populate_treeview(tree, parent, path):
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
         if os.path.isdir(item_path):
-            node = tree.insert(parent, 'end', text=item, open=False)
+            node = tree.insert(parent, 'end', text=item, values=(item,), open=False, tags=('folder',))
+
             populate_treeview(tree, node, item_path)
         elif item_path.endswith(text_formats):
             value = item_path.replace(root_dir, '').replace('\\', '/')
@@ -331,8 +331,6 @@ def create_new_file(tree, path):
             print('a')
     selected_item = tree.selection()
     if selected_item:
-        # parent_folder = tree.item(selected_item, 'text')
-        # parent_path = os.path.join(path, parent_folder)
         file_path = generate_path(tree, selected_item[0])
         selected_path = os.path.join(path, file_path)
         if os.path.isdir(selected_path):
@@ -443,7 +441,6 @@ def generate_path(tree, selected_item):
 
     return '/'.join(path[::-1])  # Reverse the list to get root first
 
-
 def on_search_change(event):
     global root_dir
 
@@ -540,6 +537,7 @@ def create_app():
     # Default column for tree structure
     treeview.heading("#0", text="Title", anchor='w')
     treeview.heading("Shortcut", text="Shortcut", anchor='w')
+
 
     # Set column widths
     treeview.column("#0", width=250)  # Set width of first column
