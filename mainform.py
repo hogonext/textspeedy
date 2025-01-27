@@ -663,12 +663,7 @@ def create_app():
 
     helper.center_window(root, 1360, 768)
 
-    # hide_window()
-
-    path = 'G:\\My Drive\\HogoNext\\textspeedy/data/Command'
-
-    if os.path.isdir(path):
-        print('yes')
+    hide_window()
 
     root.mainloop()
 
