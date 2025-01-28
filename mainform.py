@@ -24,6 +24,11 @@ current_version = "1.2"
 root_dir = os.getcwd() + '/data/'
 shortcuts_path = 'data/shortcuts.json'
 
+
+# Load icons (replace with your actual icon loading)
+folder_icon = ''
+file_icon = ''
+
 selected_node_title = ''
 selected_shortcut = ''
 selected_note_content = ''
@@ -99,9 +104,7 @@ def update_shortcut(event):
             shortcuts_path, new_shortcut, selected_path.replace(root_dir, ''))
         selected_shortcut = new_shortcut
 
-        clear_treeview(treeview)
-        populate_treeview(treeview, '', root_dir)
-
+        refresh_tree(treeview, '', root_dir)
 
 def on_right_click_treeview(event):
     # Identify the row clicked
@@ -256,21 +259,30 @@ def windows_explorer_sort(tree, parent):
         windows_explorer_sort(tree, folder)
 
 
+def get_icon(filename):
+    """Returns the appropriate icon for the given filename."""
+    global folder_icon, file_icon
+    if os.path.isdir(filename):
+        return folder_icon  # Replace with your folder icon path
+    else:
+        return file_icon   # Replace with your file icon path
+
 def populate_treeview(tree, parent, path):
     global shortcuts_path
     text_formats = ('.md', '.txt', '.py', '.json', 'html', 'css', 'js')
 
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
+        icon = get_icon(item_path)
+
         if os.path.isdir(item_path):
-            node = tree.insert(parent, 'end', text=item, open=False)
+            node = tree.insert(parent, 'end', text=item, open=False, image=icon)
 
             populate_treeview(tree, node, item_path)
         elif item_path.endswith(text_formats):
             value = item_path.replace(root_dir, '').replace('\\', '/')
             shortcut = helper.get_key_by_value(shortcuts_path, value)
-            tree.insert(parent, 'end', text=item, values=(f"{shortcut}"))
-
+            tree.insert(parent, 'end', text=item, values=(f"{shortcut}"), image=icon)
 
 def filter_tree(tree, path, search_text=""):
     global shortcuts_path
@@ -288,9 +300,11 @@ def filter_tree(tree, path, search_text=""):
     def populate_treeview(parent, path):
         for item in os.listdir(path):
             item_path = os.path.join(path, item)
+            icon = get_icon(item_path)
+
             if os.path.isdir(item_path):
                 if search_text.lower() in item.lower():
-                    node = tree.insert(parent, 'end', text=item, open=False)
+                    node = tree.insert(parent, 'end', text=item, open=False, image=icon)
                     populate_treeview(node, item_path)
                 else:
                     # Check if any children match the search text
@@ -301,7 +315,7 @@ def filter_tree(tree, path, search_text=""):
                             break
                     if has_matching_children:
                         node = tree.insert(
-                            parent, 'end', text=item, open=False)
+                            parent, 'end', text=item, open=False, image=icon)
                         populate_treeview(node, item_path)
             elif item_path.endswith(text_formats):
                 if search_text.lower() in item.lower():
@@ -322,7 +336,7 @@ def create_new_folder_at_root_level(tree, path):
         if new_folder_name:
             new_folder_path = os.path.join(selected_path, new_folder_name)
             os.makedirs(new_folder_path, exist_ok=True)
-            tree.insert('', 'end', text=new_folder_name)
+            tree.insert('', 'end', text=new_folder_name, image=folder_icon)
             tree.item('', open=True)
 
 
@@ -337,7 +351,7 @@ def create_new_folder(tree, path):
             if new_folder_name:
                 new_folder_path = os.path.join(selected_path, new_folder_name)
                 os.makedirs(new_folder_path, exist_ok=True)
-                tree.insert(selected_item, 'end', text=new_folder_name)
+                tree.insert(selected_item, 'end', text=new_folder_name,image=folder_icon)
                 tree.item(selected_item, open=True)
         else:
             messagebox.showerror("Error", "Selected item is not a folder")
@@ -358,7 +372,7 @@ def create_new_file_at_root_level(tree, path):
             new_file_path = os.path.join(selected_path, new_file_name)
             with open(new_file_path, 'w') as file:
                 file.write("")  # Create an empty file
-            tree.insert('', 'end', text=new_file_name)
+            tree.insert('', 'end', text=new_file_name,image=file_icon)
             tree.item('', open=True)
 
 
@@ -384,7 +398,7 @@ def create_new_file(tree, path):
                 new_file_path = os.path.join(selected_path, new_file_name)
                 with open(new_file_path, 'w') as file:
                     file.write("")  # Create an empty file
-                tree.insert(selected_item, 'end', text=new_file_name)
+                tree.insert(selected_item, 'end', text=new_file_name,image=file_icon)
                 tree.item(selected_item, open=True)
         else:
             messagebox.showerror("Error", "Selected item is not a folder")
@@ -492,9 +506,11 @@ def on_search_change(event):
 
     filter_tree(treeview, root_dir, search_text)
 
+    windows_explorer_sort(treeview, root_dir)
+
 
 def create_app():
-    global root, treeview, editor, status_label, searchbox
+    global root, treeview, editor, status_label, searchbox, folder_icon, file_icon
 
     new_version = helper.get_website_content(
         "https://hogonext.com/textspeedy-vesion.html")
@@ -585,7 +601,12 @@ def create_app():
     treeview.column("#0", width=250)  # Set width of first column
     treeview.column("Shortcut", width=80)  # Set width of second column
 
+    # Load icons (replace with your actual icon loading)
+    folder_icon = tk.PhotoImage(file="image/folder.png")  # Replace with your folder icon path
+    file_icon = tk.PhotoImage(file="image/file.png")  # Replace with your file icon path
+
     populate_treeview(treeview, '', root_dir)
+    windows_explorer_sort(treeview,'')
 
     # Create and pack the scrollbars for the Treeview and Text widget
     treeview_scrollbar = tk.Scrollbar(
@@ -686,7 +707,7 @@ def create_app():
 
     # Hide the window and show on the system taskbar
 
-    image = Image.open("textspeedy.ico")
+    image = Image.open("image/textspeedy.ico")
 
     def hide_window():
 
@@ -699,14 +720,14 @@ def create_app():
 
     root.protocol('WM_DELETE_WINDOW', hide_window)
 
-    root.iconbitmap("textspeedy.ico")
+    root.iconbitmap("image/textspeedy.ico")
 
     helper.center_window(root, 1360, 768)
 
     hide_window()
 
     # Sort the treeview
-    windows_explorer_sort(treeview, '')
+    # windows_explorer_sort(treeview, '')
 
     root.mainloop()
 
