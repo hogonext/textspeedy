@@ -20,7 +20,7 @@ Website: https://hogonext.com/textspeedy
 [![TextSpeedy](https://hogonext.com/wp-content/uploads/2025/01/TextSpeedy.jpg)](https://youtu.be/fl6XpFKuBXg)
 
 ## Quick Start
-- Install Python version 3.12 and above : [Download Python](https://www.python.org/downloads/)
+- Install Python version 3.12 and later : [Download Python](https://www.python.org/downloads/)
 - Download Source Code: [Github](https://github.com/hogonext/textspeedy)
 - Run **install.bat** file
 - Windows: double-click **run.bat** file
