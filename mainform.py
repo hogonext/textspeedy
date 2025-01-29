@@ -10,6 +10,8 @@ from PIL import Image
 
 from tkinter import Menu, messagebox, simpledialog, END, VERTICAL
 
+from tklinenums import TkLineNumbers
+
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 
@@ -450,6 +452,8 @@ def show_file_content(tree, path, text_widget):
                     selected_shortcut = values[0]
                 helper.highlight_markdown(editor)
                 update_status_label('')
+                text_widget.focus_set()
+                text_widget.event_generate("<<Modified>>")
 
 
 def rename_item(tree, path):
@@ -467,13 +471,13 @@ def rename_item(tree, path):
             # replace root_dir to get the rest of the path to save into json
             tree.item(selected_item, text=new_name)
             helper.update_json_value(
-                shortcuts_path, selected_shortcut, new_path.replace(root_dir, ''))
+                shortcuts_path, selected_shortcut, new_path.replace(root_dir, '')) #update shortcuts.json for new name
 
             if os.path.isdir(new_path):
                 old_folder_path = old_path.replace(root_dir, '') + '/'
                 new_folder_path = new_path.replace(root_dir, '') + '/'
                 helper.update_file_content(
-                    shortcuts_path, old_folder_path, new_folder_path)
+                    shortcuts_path, old_folder_path, new_folder_path) #update shortcuts.json for new name
 
 
 def refresh_tree(tree, parent, path):
@@ -503,9 +507,7 @@ def on_search_change(event):
 
     search_text = searchbox.get()
     clear_treeview(treeview)
-
     filter_tree(treeview, root_dir, search_text)
-
     windows_explorer_sort(treeview, root_dir)
 
 
@@ -621,6 +623,13 @@ def create_app():
     # Text widget on the right
     editor = tk.Text(right_frame, wrap="word")
 
+    # Create the TkLineNumbers widget and pack it to the left
+    linenums = TkLineNumbers(right_frame, editor, justify="center", colors=("#2197db", "#ffffff"))
+    linenums.pack(fill="y", side="left")
+    
+    # Redraw the line numbers when the text widget contents are modified
+    editor.bind("<<Modified>>", lambda event: root.after_idle(linenums.redraw), add=True)
+
     editor.pack(side="left", fill="both", expand=True)
     editor.bind('<KeyRelease>', on_text_change)
 
@@ -629,6 +638,7 @@ def create_app():
         right_frame, orient="vertical", command=editor.yview)
     editor.config(yscrollcommand=text_scrollbar.set)
     text_scrollbar.pack(side="right", fill="y")
+
 
     # Create the status label inside the status frame
     status_label = tk.Label(status_frame, text='Ready',

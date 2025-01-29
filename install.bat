@@ -3,6 +3,7 @@ pip install pyperclip
 pip install pyautoui
 pip install pywebview
 pip install ttkbootstrap
+pip install tklinenums
 pip install markdown
 pip install markdownify
 pip install requests
