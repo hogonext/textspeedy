@@ -86,6 +86,7 @@ def on_text_change(event):
         selected_note_content = editor.get("1.0", "end-1c")
         helper.write_to_file(selected_path, selected_note_content)
         helper.highlight_markdown(editor)
+        editor.event_generate("<<Modified>>")
         update_status_label('')
 
     except Exception as e:
